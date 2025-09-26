@@ -2,7 +2,9 @@
 
 #include <SDL3/SDL_events.h>
 #include <SDL3/SDL_render.h>
+#include <vector>
 #include <iostream>
+#include "../components/object.h"
 
 class Scene {
 public:
@@ -14,6 +16,7 @@ public:
   ~Scene() {
     std::cout << name + " scene destroyed" << std::endl;
   };
+
 
   virtual void init() {};
   virtual void render(SDL_Renderer *renderer) {};

@@ -1,5 +1,7 @@
+// header gaurd
 #pragma once
 
+#include "object.h"
 #include <SDL3/SDL.h>
 #include <SDL3/SDL_events.h>
 #include <SDL3/SDL_oldnames.h>
@@ -8,9 +10,6 @@
 #include <SDL3/SDL_stdinc.h>
 #include <iostream>
 
-// I dont need header gaurds since pragma once does that for me.
-// i should get some type of function callback for button presses.
-// iterator for all my buttons on screen?
 class Button
 {
 public:
@@ -40,6 +39,7 @@ public:
     renderColour(renderer);
     SDL_RenderFillRect(renderer, &button_rect);
   }
+
 
 
 private:

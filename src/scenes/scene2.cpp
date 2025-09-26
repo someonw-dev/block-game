@@ -1,17 +1,17 @@
 #pragma once
 
-#include "scene.h"
-#include "button.h"
 #include <SDL3/SDL_events.h>
 #include <SDL3/SDL_oldnames.h>
 #include <SDL3/SDL_rect.h>
 #include <iostream>
 #include "scenemanager.h"
-#include "ball69.cpp"
+#include "scene.h"
+#include "../components/button.h"
+#include "menu.h"
 
 void gotoball69() {
   std::cout << "huh" << std::endl;
-  SceneManager::getInstance().transition(std::make_unique<Ball69>());
+  SceneManager::getInstance().transition(std::make_unique<StartMenu>());
 }
 
 class SceneTwo : public Scene {

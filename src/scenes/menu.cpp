@@ -1,4 +1,4 @@
-#include "button.h"
+#include "../components/button.h"
 #include "scenemanager.h"
 #include <SDL3/SDL_events.h>
 #include <SDL3/SDL_oldnames.h>
@@ -12,8 +12,9 @@ void play() {
 }
 
 
+Button btnPlay = {100, 100, 100, 100, &play};
+
 void StartMenu::init() {
-  Button btnPlay = {100, 100, 100, 100, &play};
 }
 
 void StartMenu::render(SDL_Renderer *renderer) {

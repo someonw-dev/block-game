@@ -1,8 +1,7 @@
 #include <memory>
 #define SDL_MAIN_USE_CALLBACKS 1
 
-#include <SDL3/SDL_oldnames.h>
-#include <SDL3/SDL_rect.h>
+//#include <SDL3/SDL_oldnames.h>
 #include <SDL3/SDL.h>
 #include <SDL3/SDL_main.h>
 #include <SDL3/SDL_events.h>
@@ -10,9 +9,8 @@
 #include <SDL3/SDL_log.h>
 #include <SDL3/SDL_render.h>
 #include <SDL3/SDL_video.h>
-#include "scenemanager.h"
-#include "scene.h"
-#include "menu.h"
+#include "scenes/scenemanager.h"
+#include "scenes/menu.h"
 
 static SDL_Window *window = nullptr;
 static SDL_Renderer *renderer = nullptr;
@@ -41,6 +39,8 @@ SDL_AppResult SDL_AppEvent(void *appstate, SDL_Event *event)
   if (event->type == SDL_EVENT_QUIT)
   {
     return SDL_APP_SUCCESS;
+  } else  if (event->type == SDL_EVENT_WINDOW_RESIZED){
+    SceneManager::getInstance().on_resize(0, 0);
   } else {
     SceneManager::getInstance().update(event);
   }

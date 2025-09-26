@@ -46,6 +46,13 @@ public:
     }
   }
 
+  // width and height of the window
+  void on_resize(int w, int h) {
+    if (currentScene) {
+      currentScene->on_resize(w, h);
+    }
+  }
+
 private:
   // this is also for the singleton pattern
   SceneManager() {};
