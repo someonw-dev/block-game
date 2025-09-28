@@ -1,0 +1,17 @@
+#include "object.h"
+
+class TetrisDisplay : public Object
+{
+public:
+  TetrisDisplay(float x, float y, float width, float height);
+  ~TetrisDisplay();
+
+  static const int MAX_WIDTH = 10;
+  static const int MAX_HEIGHT = 40;
+
+  void updateInfo(int arr[MAX_WIDTH][MAX_HEIGHT]);
+  void render(SDL_Renderer *renderer) override;
+
+private:
+  int arrDisp[MAX_WIDTH][MAX_HEIGHT] = {0};
+};

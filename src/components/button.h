@@ -10,26 +10,27 @@
 #include <SDL3/SDL_stdinc.h>
 #include <iostream>
 
-class Button
+class Button : public Object
 {
 public:
   //Bjarne Stroustrup the inventor of C++ suggests to use public first and then private.
   // ==== Constructor ====
-  Button(float x, float y, float width, float height, void(*buttonPressFunc)()) {
-    button_rect = {x, y, width, height};
-    buttonPress = buttonPressFunc ;
+  Button(float x, float y, float width, float height, void(*callbackFunc)()) : Object(x, y, width, height){
+    callback = callbackFunc;
+  }
+  Button(float x, float y, float width, float height, int z, void(*callbackFunc)()) : Object(x, y, width, height, z){
+    callback = callbackFunc;
   }
   ~Button() {};
 
   void on_event(SDL_Event *event) {
     const SDL_FPoint cursor = {event->button.x, event->button.y};
 
-    if (inButton(cursor)) {
+    if (in_button(cursor)) {
       hover = true;
       if (event->type == SDL_EVENT_MOUSE_BUTTON_DOWN) {
-        buttonPress();
+        callback();
       }
-
     } else {
       hover = false;
     }
@@ -37,18 +38,16 @@ public:
 
   void render(SDL_Renderer *renderer) {
     renderColour(renderer);
-    SDL_RenderFillRect(renderer, &button_rect);
+    SDL_RenderFillRect(renderer, &region);
   }
 
 
-
 private:
-  SDL_FRect button_rect;
   bool hover;
-  void(*buttonPress)();
+  void(*callback)();
 
-  bool inButton(SDL_FPoint cursor) {
-    if (SDL_PointInRectFloat(&cursor, &button_rect)) {
+  bool in_button(SDL_FPoint cursor) {
+    if (SDL_PointInRectFloat(&cursor, &region)) {
       return true;
     } else {
       return false;

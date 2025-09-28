@@ -19,7 +19,7 @@ class SceneTwo : public Scene {
 
 public:
   SceneTwo() : Scene("Play") {};
-  void render(SDL_Renderer *renderer) override {
+  void on_render(SDL_Renderer *renderer) override {
     btnReturn.render(renderer);
   }
 

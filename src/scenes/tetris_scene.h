@@ -4,11 +4,11 @@
 #include <SDL3/SDL_events.h>
 #include <SDL3/SDL_video.h>
 
-class StartMenu : public Scene {
+class TetrisScene : public Scene {
 public:
   // constructors/destructors
-  StartMenu();
-  ~StartMenu();
+  TetrisScene();
+  ~TetrisScene();
 
   void init() override;
   void on_render(SDL_Renderer *renderer) override;
