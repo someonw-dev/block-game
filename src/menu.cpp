@@ -2,12 +2,12 @@
 #include <SDL3/SDL_oldnames.h>
 #include <SDL3/SDL_video.h>
 #include <SDL3/SDL_events.h>
-#include "scenemanager.h"
-#include "menu.h"
-#include "scene.h"
-#include "tetris_scene.h"
-#include "../components/button.h"
-#include "../constants.h"
+#include "../include/scenemanager.h"
+#include "../include/menu.h"
+#include "../include/scene.h"
+#include "../include/tetris_scene.h"
+#include "../include/button.h"
+#include "../include/constants.h"
 
 // constructor
 StartMenu::StartMenu() : Scene("Menu") {

@@ -12,9 +12,9 @@
 #include <SDL3/SDL_video.h>
 #include <math.h>
 #include <SDL3/SDL_hints.h>
-#include "scenes/scenemanager.h"
-#include "scenes/menu.h"
-#include "constants.h"
+#include "include/scenemanager.h"
+#include "include/menu.h"
+#include "include/constants.h"
 
 int width = constants::SCREEN_WIDTH;
 int height = constants::SCREEN_HEIGHT;

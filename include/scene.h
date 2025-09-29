@@ -5,7 +5,7 @@
 #include <memory>
 #include <vector>
 #include <iostream>
-#include "../components/object.h"
+#include "object.h"
 
 class Scene {
 public:

@@ -1,2 +1,10 @@
+SRC_DIR = src
+
+# gets all sources in src/
+SRCS = $(wildcard $(SRC_DIR)/*.cpp)
+
+LIBS = -lSDL3
+
 all:
-	g++ main.cpp menu.cpp -lSDL3 -o main.o
+	g++ $(SRCS) $(LIBS) main.cpp -o main.o
+

@@ -4,22 +4,21 @@
 #include <SDL3/SDL_video.h>
 #include <SDL3/SDL_events.h>
 #include <cmath>
-#include "scenemanager.h"
-#include "tetris_scene.h"
-#include "menu.h"
-#include "scene.h"
-#include "../components/button.h"
-#include "../constants.h"
-#include "../components/tetris_cube.h"
+#include "../include/scenemanager.h"
+#include "../include/tetris_scene.h"
+#include "../include/menu.h"
+#include "../include/scene.h"
+#include "../include/button.h"
+#include "../include/constants.h"
+#include "../include/tetris_display.h"
 
 // constructor
-TetrisScene::TetrisScene() : Scene("Menu") {
+TetrisScene::TetrisScene() : Scene("Tetris") {
   init();
 }
 TetrisScene::~TetrisScene() {}
 
 void back() {
-  std::cout << "play" << std::endl;
   //SceneManager::getInstance().transition(std::make_unique<StartMenu>());
   SceneManager::getInstance().return_scene();
 }
@@ -33,7 +32,7 @@ void TetrisScene::init() {
 
   Button *btnBack = new Button(10, 10, 50, 50, &back);
   push_obj(btnBack);
-  push_obj(new Cube(100, 100, 50));
+  push_obj(new TetrisDisplay(centerX, centerY, 250));
 }
 
 
