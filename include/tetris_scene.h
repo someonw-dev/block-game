@@ -13,4 +13,6 @@ public:
   void init() override;
   void on_render(SDL_Renderer *renderer) override;
   void on_event(SDL_Event *event) override;
+
+  int arrData[10][40] = {0};
 };

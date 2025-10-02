@@ -1,15 +1,15 @@
-#include "../include/tetris_display.h"
 #include <SDL3/SDL_render.h>
+#include <iostream>
+#include "../include/tetris_display.h"
 
 // the tetris board has a width of 10 cubes by 22 cubes for height (with another 18 unrendered);
-TetrisDisplay::TetrisDisplay(float x, float y, float width) : Object(x-width/2, y-width* 22/20, width, width * 22/10) {
-  float actualX = x-width/2;
-  float actualY = y-width *22/20;
-  const float LENGTH = width / MAX_WIDTH;
+TetrisDisplay::TetrisDisplay(float x, float y, float width) : Object(x, y - width * 22/10, width, width * 22/10) {
+  const float LENGTH = constants::TETRIS_CUBE_WIDTH;
+  std::cout << LENGTH << std::endl;
 
-  for (int i = 0; i<MAX_WIDTH; i++) {
-    for (int k = 0; k<MAX_HEIGHT; k++) {
-      arrCubes[i][k] = Cube(actualX + LENGTH*i, actualY + LENGTH*k, LENGTH);
+  for (int i = 0; i<constants::MAX_WIDTH; i++) {
+    for (int k = 1; k<constants::MAX_HEIGHT + 1; k++) {
+      arrCubes[i][k-1] = Cube(x + LENGTH*i, y - LENGTH*k, LENGTH);
     }
   }
 }
@@ -19,13 +19,27 @@ void TetrisDisplay::render(SDL_Renderer *renderer) {
   // rendered first so that the other ones will draw on top of it
   SDL_RenderFillRect(renderer, &region);
 
-  for (int i = 0; i<MAX_WIDTH; i++) {
-    for (int k = 0; k<MAX_HEIGHT; k++) {
+  for (int i = 0; i<constants::MAX_WIDTH; i++) {
+    for (int k = 0; k<constants::MAX_HEIGHT; k++) {
       arrCubes[i][k].render(renderer);
     }
   }
 }
 
-void TetrisDisplay::updateInfo(int arr[MAX_WIDTH][MAX_HEIGHT]) {
-
+// should be called anytime the board info changes
+void TetrisDisplay::updateColours(int (*arrData)[10][40]) {
+  for (int i = 0; i<constants::MAX_WIDTH; i++) {
+    for (int k = 0; k<constants::MAX_HEIGHT; k++) {
+      switch ((*arrData)[i][k]) {
+        case 0: {
+          arrCubes[i][k].set_colour(GRAY, BLACK);
+          break;
+        }
+        case 1: {
+          arrCubes[i][k].set_colour(RED, DARK_RED);
+          break;
+        }
+      }
+    }
+  }
 }

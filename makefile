@@ -1,5 +1,5 @@
 PROGRAM = tetris
-VERSION = 0.1
+VERSION = 0.2
 
 OUT = $(PROGRAM)-$(VERSION)
 
@@ -9,6 +9,7 @@ SRCS = $(wildcard $(SRC_DIR)/*.cpp)
 
 LIBS = -lSDL3
 
+# $(info $(SRCS))
 all:
 	g++ $(SRCS) $(LIBS) main.cpp -o $(OUT)
 

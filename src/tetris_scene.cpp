@@ -6,11 +6,14 @@
 #include <cmath>
 #include "../include/scenemanager.h"
 #include "../include/tetris_scene.h"
-#include "../include/menu.h"
+//#include "../include/menu.h"
 #include "../include/scene.h"
 #include "../include/button.h"
 #include "../include/constants.h"
 #include "../include/tetris_display.h"
+#include "../include/tetris.h"
+
+Termino terminomino;
 
 // constructor
 TetrisScene::TetrisScene() : Scene("Tetris") {
@@ -27,20 +30,19 @@ void TetrisScene::init() {
   const float centerX = constants::SCREEN_WIDTH / 2.0;
   const float centerY = constants::SCREEN_HEIGHT / 2.0;
 
-  const float width = 200;
-  const float height = 100;
-
   Button *btnBack = new Button(10, 10, 50, 50, &back);
   push_obj(btnBack);
-  push_obj(new TetrisDisplay(centerX, centerY, 250));
+
+  push_obj(new TetrisDisplay(constants::TETRIS_X, constants::TETRIS_Y, constants::TETRIS_WIDTH));
 }
 
 
 Uint64 start_time = SDL_GetTicks();
-int level = 1;
+int level = 5;
 void TetrisScene::on_render(SDL_Renderer *renderer) {
   SDL_RenderLine(renderer, 0, 0, 50, 50);
-  
+
+  terminomino.render(renderer);
   //drop down speed
 
   // === game logic ===
@@ -49,13 +51,23 @@ void TetrisScene::on_render(SDL_Renderer *renderer) {
   // *1000 to get time in miliseconds
   float time = std::pow(0.8-(level-1)*0.007, level-1) * 1000;
   if (end > start_time + time) {
-
     start_time = SDL_GetTicks();
-    //move block down
+
     std::cout << "down" << std::endl;
+    //move block down
+
+    terminomino.move(0, -1);
   }
 }
 
 void TetrisScene::on_event(SDL_Event *event) {
+  if (event->type == SDL_EVENT_KEY_DOWN) {
+    if (event->key.key == SDLK_A) {
+      terminomino.move(-1, 0);
+    }
+    if (event->key.key == SDLK_D) {
+      terminomino.move(1, 0);
+    }
+  }
 }
 

@@ -24,6 +24,15 @@ public:
   void set_z_axis(int z) {
     z_index = z;
   }
+
+  void set_y(int y) {
+    region.y = y;
+  }
+
+  void set_x(int x) {
+    region.x = x;
+  }
+
   virtual void render(SDL_Renderer *renderer) {};
   virtual void on_event(SDL_Event *event) {};
 };
