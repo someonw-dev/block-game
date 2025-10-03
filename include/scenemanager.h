@@ -31,12 +31,16 @@ public:
 
   // TODO: add some way to transition while keeping the scene condition
   void transition(std::unique_ptr<Scene> to) {
-    // keeps the old scene in memory or else there will be some
-    // race condition errors also allows you to essentiatly save a scene state since it isnt unloaded by memory
-    // its kinda iffy though ill have to maybe come back to this later
+    // this does always keep the old scene in memory which i want for certain scenes
+    // but not all of them so i'll come back to this later and add an actual save state and whatnot
+    // TODO: rewrite this to only save scenes when necesarry
+    // in rendering
+    // if (newScene) {
+    //  oldScene = std::move(newScene)
+    // }
+
     oldScene = std::move(currentScene);
     currentScene = std::move(to);
-    //currentScene->on_resize(window);
   }
 
   void return_scene() {
@@ -65,7 +69,7 @@ private:
   // this is also for the singleton pattern
   SceneManager() {};
 
-  // at first i didnt use a smart pointer but memory management was a bit concerning
+  // smart pointer for memory management
   std::unique_ptr<Scene> oldScene = nullptr;
   std::unique_ptr<Scene> currentScene = nullptr;
 };
