@@ -1,7 +1,9 @@
 #include <SDL3/SDL_events.h>
+#include <SDL3/SDL_keyboard.h>
 #include <SDL3/SDL_keycode.h>
 #include <SDL3/SDL_oldnames.h>
 #include <SDL3/SDL_render.h>
+#include <SDL3/SDL_stdinc.h>
 #include <SDL3/SDL_video.h>
 #include <SDL3/SDL_events.h>
 #include <cmath>
@@ -14,7 +16,7 @@
 #include "../include/tetris_display.h"
 #include "../include/tetris.h"
 
-Termino terminomino;
+Tetris terminomino;
 
 // constructor
 TetrisScene::TetrisScene() : Scene("Tetris") {
@@ -59,8 +61,9 @@ void TetrisScene::on_render(SDL_Renderer *renderer) {
 }
 
 void TetrisScene::on_event(SDL_Event *event) {
+
   if (event->type == SDL_EVENT_KEY_DOWN) {
-    if (event->key.key == SDLK_LEFT) {
+    if (event->key.scancode == SDL_SCANCODE_LEFT) {
       terminomino.move(-1, 0);
     }
     if (event->key.key == SDLK_RIGHT) {

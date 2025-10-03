@@ -6,6 +6,7 @@
 #include "../include/cube.h"
 #include "../include/constants.h"
 #include "../include/tetris_display.h"
+#include "../include/terminos.h"
 #include <algorithm>
 #include <vector>
 
@@ -14,46 +15,50 @@ TetrisDisplay display = {constants::TETRIS_X, constants::TETRIS_Y, constants::TE
 
 // at first i was updating the array as the termino was moving down but then i realised
 // i really just... dont have to do that lmao
-Termino::Termino() : Object(0, 0, 0, 0) {
+Tetris::Tetris() : Object(0, 0, 0, 0) {
+  rotation = 0;
+
   X = 3;
   Y = 20;
-  rotation = 3;
-  coordinates[0] = {{0, 2}, {1, 2}, {1, 1}, {2, 1}};
-  coordinates[1] = {{1, 0}, {1, 1}, {2, 1}, {2, 2}};
-  coordinates[2] = {{0, 1}, {1, 1}, {1, 0}, {2, 0}};
-  coordinates[3] = {{0, 0}, {0, 1}, {1, 1}, {1, 2}};
+
   for (Cube &i : cubes) {
     i.set_width(constants::TETRIS_CUBE_WIDTH);
-    i.set_colour(RED, DARK_RED);
   }
 
+  set_new_termino();
   move_cubes();
 }
-Termino::~Termino() {}
+Tetris::~Tetris() {}
 
 // call rotate (+1/-1) rotate -> check test conditions and use first one that works -> if they all fail dont rotate
-void Termino::rotate_left() {
-  ++rotation;
-  rotation = rotation % 4;
-  move_cubes();
+void Tetris::rotate_left() {
+  rotate(1);
 }
 
-void Termino::rotate_right() {
-  --rotation;
-  if (rotation < 0) {
-    rotation = 3;
+void Tetris::rotate_right() {
+  rotate(-1);
+}
+
+void Tetris::rotate(int r) {
+  int wanted_rotation = rotation;
+  wanted_rotation += r;
+
+  // ensures wanted_rotation is between 0-3
+  wanted_rotation %= 4;
+  if (wanted_rotation < 0) {
+    wanted_rotation = 3;
   }
-  move_cubes();
+
+  if (check_valid(X, Y, wanted_rotation)) {
+    rotation = wanted_rotation;
+    move_cubes();
+  }
 }
 
-void Termino::rotate() {
-  move_cubes();
-}
+void Tetris::checkRotation() {}
 
-void Termino::checkRotation() {}
-
-bool Termino::move(int relative_x, int relative_y) {
-  if (check_valid(X + relative_x, Y + relative_y)) {
+bool Tetris::move(int relative_x, int relative_y) {
+  if (check_valid(X + relative_x, Y + relative_y, rotation)) {
     Y += relative_y;
     X += relative_x;
 
@@ -64,9 +69,9 @@ bool Termino::move(int relative_x, int relative_y) {
   return false;
 }
 
-void Termino::quick_place() {
+void Tetris::quick_place() {
   int counter = 0;
-  while (check_valid(X, Y - counter)) {
+  while (check_valid(X, Y - counter, rotation)) {
     ++counter;
   }
 
@@ -74,25 +79,28 @@ void Termino::quick_place() {
   place_termino();
 }
 
-void Termino::move_down() {
+void Tetris::move_down() {
   // if a down move is not valid it should place down the tile
   if (!move(0, -1)) {
     place_termino();
   }
 }
 
-void Termino::place_termino() {
-  for (Position &i: coordinates[rotation]) {
+void Tetris::place_termino() {
+  for (Position &i: termino->coordinates[rotation]) {
     arrTetris[X + i.x][Y + i.y] = 1;
   }
 
   display.updateColours(&arrTetris);
   // move termino back up, get new termino, check for line clears
+  set_new_termino();
   Y = 20;
+  X = 4;
+  rotation = 0;
   move_cubes();
 }
 
-void Termino::render(SDL_Renderer *renderer) {
+void Tetris::render(SDL_Renderer *renderer) {
 
   display.render(renderer);
 
@@ -102,8 +110,8 @@ void Termino::render(SDL_Renderer *renderer) {
   }
 }
 
-bool Termino::check_occupied(int x, int y) {
-  for (Position &i: coordinates[rotation]) {
+bool Tetris::check_occupied(int x, int y, int r) {
+  for (Position &i: termino->coordinates[r]) {
     if (arrTetris[i.x + x][i.y + y] == 1) {
       return false;
     }
@@ -111,8 +119,8 @@ bool Termino::check_occupied(int x, int y) {
   return true;
 }
 // check if its inside the board
-bool Termino::check_in_range(int x, int y) {
-  for (Position &i: coordinates[rotation]) {
+bool Tetris::check_in_range(int x, int y, int r) {
+  for (Position &i: termino->coordinates[r]) {
     //ensures it wont go below 1 too far to the left and to far to the right
     if ((i.y + y < 0) || (i.x + x < 0) || (i.x + x > 9)) {
       return false;
@@ -121,24 +129,32 @@ bool Termino::check_in_range(int x, int y) {
 
   return true;
 }
-bool Termino::check_valid(int x, int y) {
+bool Tetris::check_valid(int x, int y, int r) {
   // checking range first is pretty important or else you can have
-  // a segmentation fault when accessing the array
-  if (!check_in_range(x, y)) {
+  // a segmentation fault when accessing the array out of bounds
+  if (!check_in_range(x, y, r)) {
     return false;
   }
 
-  if (!check_occupied(x, y)) {
+  if (!check_occupied(x, y, r)) {
     return false;
   }
 
   return true;
 }
 
-std::vector<int> Termino::get_unique_y() {
+void Tetris::set_new_termino() {
+  termino = get_next_termino();
+
+  for (Cube &i : cubes) {
+    i.set_colour(termino->inner, termino->outer);
+  }
+}
+
+std::vector<int> Tetris::get_unique_y() {
   std::vector<int> unique_y;
 
-  for (Position &i : coordinates[rotation]) {
+  for (Position &i : termino->coordinates[rotation]) {
     // if vector doesnt contain y add y to the unique values
     if (!(std::find(unique_y.begin(), unique_y.end(), i.y) != unique_y.end())) {
       unique_y.push_back(i.y);
@@ -148,10 +164,10 @@ std::vector<int> Termino::get_unique_y() {
   return unique_y;
 }
 
-void Termino::move_cubes() {
+void Tetris::move_cubes() {
   for (int i = 0; i < 4; i++) {
-    cubes[i].set_x(constants::TETRIS_X + constants::TETRIS_CUBE_WIDTH*(X + coordinates[rotation][i].x));
-    cubes[i].set_y(constants::TETRIS_Y - constants::TETRIS_CUBE_WIDTH*(Y + coordinates[rotation][i].y + 1));
+    cubes[i].set_x(constants::TETRIS_X + constants::TETRIS_CUBE_WIDTH*(X + termino->coordinates[rotation][i].x));
+    cubes[i].set_y(constants::TETRIS_Y - constants::TETRIS_CUBE_WIDTH*(Y + termino->coordinates[rotation][i].y + 1));
   }
 }
 

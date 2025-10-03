@@ -6,10 +6,18 @@ enum Colours {
   RED,
   BLUE,
   GREEN,
+  PURPLE,
+  YELLOW,
+  ORANGE,
+  AQUA,
   GRAY,
   DARK_RED,
   DARK_BLUE,
   DARK_GREEN,
+  DARK_PURPLE,
+  DARK_YELLOW,
+  DARK_ORANGE,
+  DARK_AQUA,
   BLACK
 };
 

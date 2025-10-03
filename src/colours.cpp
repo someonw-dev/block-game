@@ -15,6 +15,22 @@ void set_render_colour(SDL_Renderer *renderer, Colours colour) {
       SDL_SetRenderDrawColor(renderer, 0, 255, 0, 255);
       break;
     }
+    case PURPLE: {
+      SDL_SetRenderDrawColor(renderer, 191, 64, 191, 255);
+      break;
+    }
+    case YELLOW: {
+      SDL_SetRenderDrawColor(renderer, 255, 234, 0, 255);
+      break;
+    }
+    case AQUA: {
+      SDL_SetRenderDrawColor(renderer, 51, 255, 255, 255);
+      break;
+    }
+    case ORANGE: {
+      SDL_SetRenderDrawColor(renderer, 255, 95, 31, 255);
+      break;
+    }
     case GRAY: {
       SDL_SetRenderDrawColor(renderer, 50, 50, 50, 255);
       break;
@@ -29,6 +45,22 @@ void set_render_colour(SDL_Renderer *renderer, Colours colour) {
     }
     case DARK_GREEN: {
       SDL_SetRenderDrawColor(renderer, 0, 130, 0, 255);
+      break;
+    }
+    case DARK_PURPLE: {
+      SDL_SetRenderDrawColor(renderer, 112, 41, 99, 255);
+      break;
+    }
+    case DARK_YELLOW: {
+      SDL_SetRenderDrawColor(renderer, 228, 155, 15, 255);
+      break;
+    }
+    case DARK_AQUA: {
+      SDL_SetRenderDrawColor(renderer, 0, 115, 115, 255);
+      break;
+    }
+    case DARK_ORANGE: {
+      SDL_SetRenderDrawColor(renderer, 160, 82, 45, 255);
       break;
     }
     case BLACK: {

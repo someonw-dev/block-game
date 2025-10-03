@@ -7,18 +7,19 @@
 #include "../include/object.h"
 #include "../include/cube.h"
 #include "../include/constants.h"
+#include "terminos.h"
 
 // at first i was updating the array as the termino was moving down but then i realised
 // i really just... dont have to do that lmao
-class Termino : Object {
+class Tetris : Object {
 public:
-  Termino();
-  ~Termino();
+  Tetris();
+  ~Tetris();
 
   // rotate -> check test conditions if one works use that one -> if they all fail
   void rotate_left();
   void rotate_right();
-  void rotate();
+  void rotate(int r);
   void checkRotation();
   bool move(int relative_x, int relative_y);
   void quick_place();
@@ -28,17 +29,17 @@ public:
 
 private:
   std::vector<int> get_unique_y();
-  bool check_occupied(int x, int y);
-  bool check_in_range(int x, int y);
-  bool check_valid(int x, int y);
+  bool check_occupied(int x, int y, int r);
+  bool check_in_range(int x, int y, int r);
+  bool check_valid(int x, int y, int r);
 
+  void set_new_termino();
   void move_cubes();
 
   int rotation;
-  // local x, y that changes based on rotation
-  std::map<int, std::vector<Position>> coordinates;
-  //global x, y
+  Termino *termino;
   Cube cubes[4];
+  //global x, y
   int X;
   int Y;
 };
