@@ -21,13 +21,13 @@ public:
   void rotate();
   void checkRotation();
   bool move(int relative_x, int relative_y);
-  void move_left();
-  void move_right();
+  void quick_place();
   void move_down();
   void place_termino();
   void render(SDL_Renderer *renderer) override;
 
 private:
+  std::vector<int> get_unique_y();
   bool check_occupied(int x, int y);
   bool check_in_range(int x, int y);
   bool check_valid(int x, int y);

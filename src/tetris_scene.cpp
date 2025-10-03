@@ -1,4 +1,5 @@
 #include <SDL3/SDL_events.h>
+#include <SDL3/SDL_keycode.h>
 #include <SDL3/SDL_oldnames.h>
 #include <SDL3/SDL_render.h>
 #include <SDL3/SDL_video.h>
@@ -33,7 +34,7 @@ void TetrisScene::init() {
   Button *btnBack = new Button(10, 10, 50, 50, &back);
   push_obj(btnBack);
 
-  push_obj(new TetrisDisplay(constants::TETRIS_X, constants::TETRIS_Y, constants::TETRIS_WIDTH));
+  //push_obj(new TetrisDisplay(constants::TETRIS_X, constants::TETRIS_Y, constants::TETRIS_WIDTH));
 }
 
 
@@ -53,20 +54,26 @@ void TetrisScene::on_render(SDL_Renderer *renderer) {
   if (end > start_time + time) {
     start_time = SDL_GetTicks();
 
-    std::cout << "down" << std::endl;
-    //move block down
-
-    terminomino.move(0, -1);
+    terminomino.move_down();
   }
 }
 
 void TetrisScene::on_event(SDL_Event *event) {
   if (event->type == SDL_EVENT_KEY_DOWN) {
-    if (event->key.key == SDLK_A) {
+    if (event->key.key == SDLK_LEFT) {
       terminomino.move(-1, 0);
     }
-    if (event->key.key == SDLK_D) {
+    if (event->key.key == SDLK_RIGHT) {
       terminomino.move(1, 0);
+    }
+    if (event->key.key == SDLK_Z) {
+      terminomino.rotate_left();
+    }
+    if (event->key.key == SDLK_X) {
+      terminomino.rotate_right();
+    }
+    if (event->key.key == SDLK_SPACE) {
+      terminomino.quick_place();
     }
   }
 }

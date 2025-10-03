@@ -4,6 +4,7 @@
 #include "constants.h"
 #include "object.h"
 #include "cube.h"
+#include "position.h"
 
 class TetrisDisplay : public Object
 {
