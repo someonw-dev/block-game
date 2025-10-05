@@ -26,19 +26,29 @@ public:
   void move_down();
   void place_termino();
   void render(SDL_Renderer *renderer) override;
+  void swap_active_piece();
 
 private:
   std::vector<int> get_unique_y();
   bool check_occupied(int x, int y, int r);
   bool check_in_range(int x, int y, int r);
   bool check_valid(int x, int y, int r);
+  int get_y_intersect();
 
+  void set_termino_colours();
   void set_new_termino();
   void move_cubes();
+  void clear_row();
 
   int rotation;
   Termino *termino;
-  Cube cubes[4];
+  Cube termino_cubes[4];
+  Termino *saved_termino;
+  Cube saved_cubes[4];
+  Termino *preview;
+  Cube preview_cubes[4];
+  Termino *ghost;
+  Cube ghost_cubes[4];
   //global x, y
   int X;
   int Y;

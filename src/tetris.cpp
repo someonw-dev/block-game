@@ -1,3 +1,4 @@
+#include <functional>
 #include <iostream>
 #include <map>
 #include "../include/tetris.h"
@@ -7,6 +8,7 @@
 #include "../include/constants.h"
 #include "../include/tetris_display.h"
 #include "../include/terminos.h"
+#include "../include/colour_map.h"
 #include <algorithm>
 #include <vector>
 
@@ -16,12 +18,25 @@ TetrisDisplay display = {constants::TETRIS_X, constants::TETRIS_Y, constants::TE
 // at first i was updating the array as the termino was moving down but then i realised
 // i really just... dont have to do that lmao
 Tetris::Tetris() : Object(0, 0, 0, 0) {
+  termino_init();
   rotation = 0;
 
   X = 3;
   Y = 20;
 
-  for (Cube &i : cubes) {
+  for (Cube &i : termino_cubes) {
+    i.set_width(constants::TETRIS_CUBE_WIDTH);
+  }
+
+  for (Cube &i : preview_cubes) {
+    i.set_width(constants::TETRIS_CUBE_WIDTH);
+  }
+
+  for (Cube &i : ghost_cubes) {
+    i.set_width(constants::TETRIS_CUBE_WIDTH);
+  }
+
+  for (Cube &i : saved_cubes) {
     i.set_width(constants::TETRIS_CUBE_WIDTH);
   }
 
@@ -32,11 +47,11 @@ Tetris::~Tetris() {}
 
 // call rotate (+1/-1) rotate -> check test conditions and use first one that works -> if they all fail dont rotate
 void Tetris::rotate_left() {
-  rotate(1);
+  rotate(-1);
 }
 
 void Tetris::rotate_right() {
-  rotate(-1);
+  rotate(1);
 }
 
 void Tetris::rotate(int r) {
@@ -49,13 +64,13 @@ void Tetris::rotate(int r) {
     wanted_rotation = 3;
   }
 
+  // there are 5 tests each with 8 different test values depending on where it is rotating from
+  // these values are defined in the terminos themself because the I termino has different test values
   if (check_valid(X, Y, wanted_rotation)) {
     rotation = wanted_rotation;
     move_cubes();
   }
 }
-
-void Tetris::checkRotation() {}
 
 bool Tetris::move(int relative_x, int relative_y) {
   if (check_valid(X + relative_x, Y + relative_y, rotation)) {
@@ -70,12 +85,7 @@ bool Tetris::move(int relative_x, int relative_y) {
 }
 
 void Tetris::quick_place() {
-  int counter = 0;
-  while (check_valid(X, Y - counter, rotation)) {
-    ++counter;
-  }
-
-  Y -= counter - 1;
+  Y -= get_y_intersect();
   place_termino();
 }
 
@@ -88,10 +98,12 @@ void Tetris::move_down() {
 
 void Tetris::place_termino() {
   for (Position &i: termino->coordinates[rotation]) {
-    arrTetris[X + i.x][Y + i.y] = 1;
+    arrTetris[X + i.x][Y + i.y] = termino->colour_map_key;
   }
 
+  clear_row();
   display.updateColours(&arrTetris);
+
   // move termino back up, get new termino, check for line clears
   set_new_termino();
   Y = 20;
@@ -100,19 +112,74 @@ void Tetris::place_termino() {
   move_cubes();
 }
 
+void Tetris::clear_row() {
+  std::vector<int> rows = get_unique_y();
+
+  for (int &i: rows) {
+    bool filled = true;
+    for (int k = 0; k<constants::MAX_WIDTH; k++) {
+      if (arrTetris[k][i] == 0) {
+        filled = false;
+        break;
+      }
+    }
+
+    if (filled) {
+      for (int k = i; k<constants::MAX_HEIGHT - 1; k++) {
+        for (int j = 0; j<constants::MAX_WIDTH; j++) {
+          arrTetris[j][k] = arrTetris[j][k + 1];
+        }
+      }
+    }
+  }
+}
+
+
+void Tetris::swap_active_piece() {
+  // if there is a saved termino
+  if (saved_termino) {
+    Termino *temp = termino;
+    termino = saved_termino;
+    saved_termino = temp;
+
+    set_termino_colours();
+    move_cubes();
+  } else {
+    // if there isnt a saved termino
+    saved_termino = termino;
+    set_new_termino();
+    move_cubes();
+  }
+}
+
+
 void Tetris::render(SDL_Renderer *renderer) {
 
   display.render(renderer);
 
+
+  for (Cube &i : preview_cubes) {
+    i.render(renderer);
+  }
+
   // piece should be infront of everything
-  for (Cube &i : cubes) {
+  for (Cube &i : termino_cubes) {
     i.render(renderer);
   }
 }
 
+int Tetris::get_y_intersect() {
+  int counter = 0;
+  while (check_valid(X, Y - counter, rotation)) {
+    ++counter;
+  }
+
+  return counter - 1;
+}
+
 bool Tetris::check_occupied(int x, int y, int r) {
   for (Position &i: termino->coordinates[r]) {
-    if (arrTetris[i.x + x][i.y + y] == 1) {
+    if (arrTetris[i.x + x][i.y + y] != 0) {
       return false;
     }
   }
@@ -143,11 +210,26 @@ bool Tetris::check_valid(int x, int y, int r) {
   return true;
 }
 
+void Tetris::set_termino_colours() {
+  for (Cube &i : termino_cubes) {
+    i.set_colour(colour_map[termino->colour_map_key][0], colour_map[termino->colour_map_key][1]);
+  }
+
+  for (Cube &i : preview_cubes) {
+    i.set_colour(colour_map[preview->colour_map_key][0], colour_map[preview->colour_map_key][1]);
+  }
+}
+
 void Tetris::set_new_termino() {
   termino = get_next_termino();
+  preview = get_preview_termino();
 
-  for (Cube &i : cubes) {
-    i.set_colour(termino->inner, termino->outer);
+  set_termino_colours();
+
+  const float PREVIEW_X = constants::TETRIS_X + constants::TETRIS_WIDTH + 30;
+  for (int i = 0; i < 4; i++) {
+    preview_cubes[i].set_x(PREVIEW_X + constants::TETRIS_CUBE_WIDTH*(preview->coordinates[rotation][i].x));
+    preview_cubes[i].set_y(100 + constants::TETRIS_CUBE_WIDTH*(preview->coordinates[rotation][i].y));
   }
 }
 
@@ -155,19 +237,21 @@ std::vector<int> Tetris::get_unique_y() {
   std::vector<int> unique_y;
 
   for (Position &i : termino->coordinates[rotation]) {
-    // if vector doesnt contain y add y to the unique values
-    if (!(std::find(unique_y.begin(), unique_y.end(), i.y) != unique_y.end())) {
-      unique_y.push_back(i.y);
+    // if vector doesnt contain new y add new y to the unique values
+    if (!(std::find(unique_y.begin(), unique_y.end(), i.y + Y) != unique_y.end())) {
+      unique_y.push_back(i.y + Y);
     }
   }
+
+  std::sort(unique_y.begin(), unique_y.end(), std::greater<int>());
 
   return unique_y;
 }
 
 void Tetris::move_cubes() {
   for (int i = 0; i < 4; i++) {
-    cubes[i].set_x(constants::TETRIS_X + constants::TETRIS_CUBE_WIDTH*(X + termino->coordinates[rotation][i].x));
-    cubes[i].set_y(constants::TETRIS_Y - constants::TETRIS_CUBE_WIDTH*(Y + termino->coordinates[rotation][i].y + 1));
+    termino_cubes[i].set_x(constants::TETRIS_X + constants::TETRIS_CUBE_WIDTH*(X + termino->coordinates[rotation][i].x));
+    termino_cubes[i].set_y(constants::TETRIS_Y - constants::TETRIS_CUBE_WIDTH*(Y + termino->coordinates[rotation][i].y + 1));
   }
 }
 

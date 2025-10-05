@@ -25,6 +25,9 @@ public:
 
 
   void render_handler(SDL_Renderer *renderer) {
+    // handles updates before rendering
+    update();
+
     for (Object *i : objects) {
       i->render(renderer);
     }
@@ -40,6 +43,7 @@ public:
   }
 
   virtual void init() {};
+  virtual void update() {};
   virtual void on_render(SDL_Renderer *renderer) {};
   virtual void on_event(SDL_Event *event) {};
 

@@ -1,5 +1,17 @@
 #include "../include/terminos.h"
 #include <cstdlib>
+#include <ctime>
+#include <iostream>
+
+Termino::Termino() {
+  set_kick_data();
+}
+Termino::~Termino() {}
+
+void Termino::set_kick_data() {
+  // default -> right position
+  wall_kick_data[{0, 1}] = {{0,1}};
+}
 
 struct I : Termino {
   I() {
@@ -11,8 +23,7 @@ struct I : Termino {
     coordinates[2] = {{0, 1}, {1, 1}, {2, 1}, {3, 1}};
     coordinates[3] = {{1, 0}, {1, 1}, {1, 2}, {1, 3}};
 
-    inner = AQUA;
-    outer = DARK_AQUA;
+    colour_map_key = 1;
   }
   ~I() {}
 } I;
@@ -27,8 +38,7 @@ struct J : Termino {
     coordinates[2] = {{0, 1}, {1, 1}, {2, 1}, {2, 0}};
     coordinates[3] = {{0, 0}, {1, 0}, {1, 1}, {1, 2}};
 
-    inner = BLUE;
-    outer = DARK_BLUE;
+    colour_map_key = 2;
   }
   ~J() {}
 } J;
@@ -43,8 +53,7 @@ struct L : Termino {
     coordinates[2] = {{0, 0}, {0, 1}, {1, 1}, {2, 1}};
     coordinates[3] = {{0, 2}, {1, 2}, {1, 1}, {1, 0}};
 
-    inner = ORANGE;
-    outer = DARK_ORANGE;
+    colour_map_key = 3;
   }
   ~L() {}
 } L;
@@ -59,8 +68,7 @@ struct O : Termino {
     coordinates[2] = {{0, 0}, {0, 1}, {1, 0}, {1, 1}};
     coordinates[3] = {{0, 0}, {0, 1}, {1, 0}, {1, 1}};
 
-    inner = YELLOW;
-    outer = DARK_YELLOW;
+    colour_map_key = 4;
   }
   ~O() {}
 } O;
@@ -75,8 +83,7 @@ struct Z : Termino {
     coordinates[2] = {{0, 0}, {1, 0}, {1, 1}, {2, 1}};
     coordinates[3] = {{0, 2}, {0, 1}, {1, 1}, {1, 0}};
 
-    inner = GREEN;
-    outer = DARK_GREEN;
+    colour_map_key = 5;
   }
   ~Z() {}
 } Z;
@@ -91,8 +98,7 @@ struct T : Termino {
     coordinates[2] = {{0, 1}, {1, 1}, {2, 1}, {1, 0}};
     coordinates[3] = {{1, 0}, {1, 1}, {1, 2}, {0, 1}};
 
-    inner = PURPLE;
-    outer = DARK_PURPLE;
+    colour_map_key = 6;
   }
   ~T() {}
 } T;
@@ -107,50 +113,99 @@ struct S : Termino {
     coordinates[2] = {{0, 1}, {1, 1}, {1, 0}, {2, 0}};
     coordinates[3] = {{0, 0}, {0, 1}, {1, 1}, {1, 2}};
 
-    inner = RED;
-    outer = DARK_RED;
-  }
+    colour_map_key = 7;
+ }
   ~S() {}
 } S;
 
-Termino* get_next_termino() {
-  // this is bad but i wanted to show PIETER A PROTOTYPE BUT HE HAS TAKEN SO LONG I MIGHT JUST FIX THIS AND MAKE IT WORK CORRECTLY
-  int random_term = rand() % 7;
+static const int MAX = 7;
+static int arrBag[MAX];
+static Termino* preview_piece = nullptr;
 
-  switch (random_term) {
-    case 0: {
-      return &I;
-      break;
+Termino* get_piece(int piece);
+
+void fill_bag() {
+  for (int i = 0; i<MAX;i++) {
+    arrBag[i] = i + 1;
+  }
+
+  for (int i = 0; i<MAX;i++) {
+    int swap = rand() % 7;
+    int temp = arrBag[i];
+    arrBag[i] = arrBag[swap];
+    arrBag[swap] = temp;
+  }
+}
+
+Termino* next_piece() {
+  for (int i = 0; i<MAX;i++) {
+    if (arrBag[i] != 0) {
+      int piece = arrBag[i];
+      arrBag[i] = 0;
+      return get_piece(piece);
     }
+      //std::cout << "test" << i << std::endl;
+  }
+
+  // this is kinda cool if it doesnt return in the top loop
+  // it means that all the pieces were taken so it fills the bag and returns the value of the function on the next run
+  fill_bag();
+  return next_piece();
+}
+
+Termino* get_piece(int piece) {
+  switch (piece) {
     case 1: {
-      return &J;
-      break;
+      return &I;
     }
     case 2: {
-      return &L;
-      break;
+      return &J;
     }
     case 3: {
-      return &O;
-      break;
+      return &L;
     }
     case 4: {
-      return &Z;
-      break;
+      return &O;
     }
     case 5: {
-      return &T;
-      break;
+      return &Z;
     }
     case 6: {
+      return &T;
+    }
+    case 7: {
       return &S;
-      break;
     }
   }
 
+  // idk just in case should never actually happen
   return &Z;
 }
 
-Termino* get_preview_termino() {
-  return &I;
+Termino* get_next_termino() {
+  if (!preview_piece) {
+    preview_piece = next_piece();
+  }
+
+  Termino *next_termino = preview_piece;
+
+  preview_piece = next_piece();
+
+  return next_termino;
 }
+
+Termino* get_preview_termino() {
+  if (!preview_piece) {
+    preview_piece = next_piece();
+  }
+
+  return preview_piece;
+}
+
+void termino_init() {
+  srand(time(NULL));
+
+  for (int i = 0; i<MAX; i++) {
+    arrBag[i] = 0;
+  }
+};

@@ -67,5 +67,9 @@ void set_render_colour(SDL_Renderer *renderer, Colours colour) {
       SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
       break;
     }
+    case INVISIBLE: {
+      SDL_SetRenderDrawColor(renderer, 0, 0, 0, 0);
+      break;
+    }
   }
 }

@@ -1,5 +1,7 @@
 #include <SDL3/SDL_oldnames.h>
 #include <SDL3/SDL_timer.h>
+#include <cstdlib>
+#include <ctime>
 #define SDL_MAIN_USE_CALLBACKS 1
 
 //#include <SDL3/SDL_oldnames.h>
@@ -43,6 +45,8 @@ SDL_AppResult SDL_AppInit(void **appstate, int argc, char *argv[])
     SDL_Log("Couldn't change callback rate: %s", SDL_GetError());
     return SDL_APP_FAILURE;
   }
+
+  srand(time(NULL));
 
   return SDL_APP_CONTINUE;
 }

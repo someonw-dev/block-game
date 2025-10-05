@@ -11,6 +11,7 @@ public:
   ~TetrisScene();
 
   void init() override;
+  void update() override;
   void on_render(SDL_Renderer *renderer) override;
   void on_event(SDL_Event *event) override;
 
