@@ -8,6 +8,7 @@
 #include "../include/tetris_scene.h"
 #include "../include/button.h"
 #include "../include/constants.h"
+#include "../include/text.h"
 
 // constructor
 StartMenu::StartMenu() : Scene("Menu") {
@@ -35,15 +36,20 @@ void StartMenu::init() {
 
   const float WIDTH = 150;
   const float HEIGHT = 60;
+  const float BUTTON_CENTER = centerX - WIDTH * 0.5;
 
-  Button *btnPlay = new Button(centerX - 100, centerY - 50, WIDTH, HEIGHT, &play);
+  Button *btnPlay = new Button(BUTTON_CENTER, centerY - 50, WIDTH, HEIGHT, &play);
   push_obj(btnPlay);
 
-  Button *btnSettings = new Button(centerX - 100, centerY + 50, WIDTH, HEIGHT, &settings);
+  Button *btnSettings = new Button(BUTTON_CENTER, centerY + 50, WIDTH, HEIGHT, &settings);
   push_obj(btnSettings);
 
-  Button *btnQuit = new Button(centerX - 100, centerY + 150, WIDTH, HEIGHT, &quit);
+  Button *btnQuit = new Button(BUTTON_CENTER, centerY + 150, WIDTH, HEIGHT, &quit);
   push_obj(btnQuit);
+
+  const float TEXT_WIDTH = 400;
+  Text *title = new Text("TETRIS", centerX - TEXT_WIDTH * 0.5, 100, TEXT_WIDTH, SceneManager::getInstance().get_renderer());
+  push_obj(title);
 }
 
 void StartMenu::on_render(SDL_Renderer *renderer) {

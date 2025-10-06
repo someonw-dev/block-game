@@ -15,6 +15,7 @@
 #include "../include/button.h"
 #include "../include/constants.h"
 #include "../include/tetris.h"
+#include "../include/text.h"
 
 Tetris terminomino;
 
@@ -37,6 +38,10 @@ void TetrisScene::init() {
   push_obj(btnBack);
 
   //push_obj(new TetrisDisplay(constants::TETRIS_X, constants::TETRIS_Y, constants::TETRIS_WIDTH));
+
+
+  Text *title = new Text("test", 100, 100, 100, SceneManager::getInstance().get_renderer());
+  push_obj(title);
 }
 
 

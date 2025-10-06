@@ -49,7 +49,7 @@ public:
     oldScene = std::move(temp);
   }
 
-  void render(SDL_Renderer *renderer) {
+  void render() {
     if (currentScene) {
       currentScene->render_handler(renderer);
     }
@@ -59,6 +59,14 @@ public:
     if (currentScene) {
       currentScene->event_handler(event);
     }
+  }
+
+  void set_renderer(SDL_Renderer *set_renderer) {
+    renderer = set_renderer;
+  }
+
+  SDL_Renderer* get_renderer() {
+    return renderer;
   }
 
   void quit() {
@@ -72,4 +80,5 @@ private:
   // smart pointer for memory management
   std::unique_ptr<Scene> oldScene = nullptr;
   std::unique_ptr<Scene> currentScene = nullptr;
+  SDL_Renderer *renderer;
 };

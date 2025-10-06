@@ -53,4 +53,5 @@ private:
   //global x, y
   int X;
   int Y;
+  int score;
 };

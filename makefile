@@ -1,5 +1,5 @@
 PROGRAM = tetris
-VERSION = 0.3
+VERSION = 0.4
 
 OUT = $(PROGRAM)-$(VERSION)
 
@@ -7,7 +7,7 @@ SRC_DIR = src
 # gets all sources in src/
 SRCS = $(wildcard $(SRC_DIR)/*.cpp)
 
-LIBS = -lSDL3
+LIBS = -lSDL3 -lSDL3_ttf
 
 # $(info $(SRCS))
 all:

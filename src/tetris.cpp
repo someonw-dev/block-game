@@ -264,6 +264,10 @@ void Tetris::set_new_termino() {
 
   set_termino_colours();
 
+  if (!check_valid(termino->x_start, termino->y_start, 0)) {
+    std::cout << "you lost :(" << std::endl;
+  }
+
   Y = termino->y_start;
   X = termino->x_start;
   rotation = 0;
@@ -273,6 +277,7 @@ void Tetris::set_new_termino() {
     preview_cubes[i].set_x(PREVIEW_X + constants::TETRIS_CUBE_WIDTH*(preview->coordinates[rotation][i].x));
     preview_cubes[i].set_y(200 - constants::TETRIS_CUBE_WIDTH*(preview->coordinates[rotation][i].y));
   }
+
 }
 
 std::vector<int> Tetris::get_unique_y() {

@@ -1,6 +1,8 @@
 #pragma once
+#include <SDL3_ttf/SDL_ttf.h>
 
 namespace constants {
+  // ====== Tetris constants ======
   const int SCREEN_WIDTH = 1280;
   const int SCREEN_HEIGHT = 720;
 
@@ -11,5 +13,4 @@ namespace constants {
   const int MAX_WIDTH = 10;
   const int MAX_HEIGHT = 22;
   const float TETRIS_CUBE_WIDTH = TETRIS_WIDTH / MAX_WIDTH;
-
 }
