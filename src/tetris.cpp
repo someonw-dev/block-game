@@ -23,18 +23,23 @@ Tetris::Tetris() : Object(0, 0, 0, 0) {
 
   for (Cube &i : termino_cubes) {
     i.set_width(constants::TETRIS_CUBE_WIDTH);
+    i.set_y(-50);
   }
 
   for (Cube &i : preview_cubes) {
     i.set_width(constants::TETRIS_CUBE_WIDTH);
+    i.set_y(-50);
   }
 
   for (Cube &i : ghost_cubes) {
     i.set_width(constants::TETRIS_CUBE_WIDTH);
+    i.set_colour(LIGHT_GRAY, GRAY);
+    i.set_y(-50);
   }
 
   for (Cube &i : saved_cubes) {
     i.set_width(constants::TETRIS_CUBE_WIDTH);
+    i.set_y(-50);
   }
 
   set_new_termino();
@@ -147,32 +152,35 @@ void Tetris::clear_row() {
 
 
 void Tetris::swap_active_piece() {
-  // TODO: only allow swap once
   // if there is a saved termino
-
   if (swap) {
     //doesnt let you swap again until the next piece is placed
     swap = false;
-  if (saved_termino) {
-    Termino *temp = termino;
-    termino = saved_termino;
-    saved_termino = temp;
+    if (saved_termino) {
+      Termino *temp = termino;
+      termino = saved_termino;
+      saved_termino = temp;
 
-    Y = termino->y_start;
-    X = termino->x_start;
-    rotation = 0;
+      Y = termino->y_start;
+      X = termino->x_start;
+      rotation = 0;
 
-    set_termino_colours();
-    move_cubes();
-  } else {
-    // if there isnt a saved termino
-    saved_termino = termino;
-    set_new_termino();
-    move_cubes();
+      set_termino_colours();
+      move_cubes();
+    } else {
+      // if there isnt a saved termino
+      saved_termino = termino;
+      set_new_termino();
+      move_cubes();
+    }
+    const float SAVED_X = constants::TETRIS_X - 200;
+    for (int i = 0; i < 4; i++) {
+      saved_cubes[i].set_x(SAVED_X + constants::TETRIS_CUBE_WIDTH*(saved_termino->coordinates[0][i].x));
+      saved_cubes[i].set_y(200 - constants::TETRIS_CUBE_WIDTH*(saved_termino->coordinates[0][i].y));
+      saved_cubes[i].set_colour(colour_map[saved_termino->colour_map_key][0], colour_map[saved_termino->colour_map_key][1]);
+    }
   }
-  }
 
-  // TODO: update preview cubes here
 }
 
 
@@ -182,6 +190,13 @@ void Tetris::render(SDL_Renderer *renderer) {
 
 
   for (Cube &i : preview_cubes) {
+    i.render(renderer);
+  }
+  for (Cube &i : saved_cubes) {
+    i.render(renderer);
+  }
+
+  for (Cube &i : ghost_cubes) {
     i.render(renderer);
   }
 
@@ -256,7 +271,7 @@ void Tetris::set_new_termino() {
   const float PREVIEW_X = constants::TETRIS_X + constants::TETRIS_WIDTH + 30;
   for (int i = 0; i < 4; i++) {
     preview_cubes[i].set_x(PREVIEW_X + constants::TETRIS_CUBE_WIDTH*(preview->coordinates[rotation][i].x));
-    preview_cubes[i].set_y(100 + constants::TETRIS_CUBE_WIDTH*(preview->coordinates[rotation][i].y));
+    preview_cubes[i].set_y(200 - constants::TETRIS_CUBE_WIDTH*(preview->coordinates[rotation][i].y));
   }
 }
 
@@ -279,6 +294,14 @@ void Tetris::move_cubes() {
   for (int i = 0; i < 4; i++) {
     termino_cubes[i].set_x(constants::TETRIS_X + constants::TETRIS_CUBE_WIDTH*(X + termino->coordinates[rotation][i].x));
     termino_cubes[i].set_y(constants::TETRIS_Y - constants::TETRIS_CUBE_WIDTH*(Y + termino->coordinates[rotation][i].y + 1));
+  }
+
+  // get y intersect is kinda a bad name because it actually gets the y difference
+  int ydif = get_y_intersect();
+
+  for (int i = 0; i < 4; i++) {
+    ghost_cubes[i].set_x(constants::TETRIS_X + constants::TETRIS_CUBE_WIDTH*(X + termino->coordinates[rotation][i].x));
+    ghost_cubes[i].set_y(constants::TETRIS_Y - constants::TETRIS_CUBE_WIDTH*(Y + termino->coordinates[rotation][i].y + 1 - ydif));
   }
 }
 

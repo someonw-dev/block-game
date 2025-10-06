@@ -1,5 +1,4 @@
 #include <SDL3/SDL_render.h>
-#include <iostream>
 #include "../include/tetris_display.h"
 #include "../include/colour_map.h"
 
