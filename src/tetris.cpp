@@ -21,9 +21,6 @@ Tetris::Tetris() : Object(0, 0, 0, 0) {
   termino_init();
   rotation = 0;
 
-  X = 3;
-  Y = 20;
-
   for (Cube &i : termino_cubes) {
     i.set_width(constants::TETRIS_CUBE_WIDTH);
   }
@@ -69,7 +66,23 @@ void Tetris::rotate(int r) {
   if (check_valid(X, Y, wanted_rotation)) {
     rotation = wanted_rotation;
     move_cubes();
+  } else {
+    for (int i = 0; i<4; i++) {
+      if (check_valid(X + termino->wall_kick_data[{rotation, wanted_rotation}][i].x,
+                      Y + termino->wall_kick_data[{rotation, wanted_rotation}][i].y,
+                      wanted_rotation))
+      {
+        X += termino->wall_kick_data[{rotation, wanted_rotation}][i].x;
+        Y += termino->wall_kick_data[{rotation, wanted_rotation}][i].y;
+        rotation = wanted_rotation;
+        move_cubes();
+        // first valid set of coords is where it should be placed
+        break;
+      }
+    }
   }
+
+  // if none of the checks pass it fails completely and doesnt rotate
 }
 
 bool Tetris::move(int relative_x, int relative_y) {
@@ -104,11 +117,9 @@ void Tetris::place_termino() {
   clear_row();
   display.updateColours(&arrTetris);
 
+  swap = true;
   // move termino back up, get new termino, check for line clears
   set_new_termino();
-  Y = 20;
-  X = 4;
-  rotation = 0;
   move_cubes();
 }
 
@@ -136,11 +147,20 @@ void Tetris::clear_row() {
 
 
 void Tetris::swap_active_piece() {
+  // TODO: only allow swap once
   // if there is a saved termino
+
+  if (swap) {
+    //doesnt let you swap again until the next piece is placed
+    swap = false;
   if (saved_termino) {
     Termino *temp = termino;
     termino = saved_termino;
     saved_termino = temp;
+
+    Y = termino->y_start;
+    X = termino->x_start;
+    rotation = 0;
 
     set_termino_colours();
     move_cubes();
@@ -150,6 +170,9 @@ void Tetris::swap_active_piece() {
     set_new_termino();
     move_cubes();
   }
+  }
+
+  // TODO: update preview cubes here
 }
 
 
@@ -225,6 +248,10 @@ void Tetris::set_new_termino() {
   preview = get_preview_termino();
 
   set_termino_colours();
+
+  Y = termino->y_start;
+  X = termino->x_start;
+  rotation = 0;
 
   const float PREVIEW_X = constants::TETRIS_X + constants::TETRIS_WIDTH + 30;
   for (int i = 0; i < 4; i++) {

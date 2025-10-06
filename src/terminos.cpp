@@ -10,13 +10,27 @@ Termino::~Termino() {}
 
 void Termino::set_kick_data() {
   // default -> right position
-  wall_kick_data[{0, 1}] = {{0,1}};
+  wall_kick_data[{0, 1}] = {{-1,0}, {-1,+1}, {0,-2}, {-1, -2}};
+  // right -> default position
+  wall_kick_data[{1, 0}] = {{+1,0}, {+1,-1}, {0,+2}, {+1, +2}};
+  // right -> upside down position
+  wall_kick_data[{1, 2}] = {{+1,0}, {+1,-1}, {0,+2}, {+1, +2}};
+  // upside down -> right position
+  wall_kick_data[{2, 1}] = {{-1,0}, {-1,+1}, {0,-2}, {-1, -2}};
+  //  upside down -> left position
+  wall_kick_data[{2, 3}] = {{+1,0}, {+1,+1}, {0,-2}, {+1, -2}};
+  // ledt -> upside down position
+  wall_kick_data[{3, 2}] = {{-1,0}, {-1,-1}, {0,+2}, {-1, +2}};
+  // left ->  default position
+  wall_kick_data[{3, 0}] = {{-1,0}, {-1,-1}, {0,+2}, {-1, +2}};
+  // default -> left position
+  wall_kick_data[{0, 3}] = {{+1,0}, {+1,+1}, {0,-2}, {+1, -2}};
 }
 
 struct I : Termino {
   I() {
     x_start = 3;
-    y_start = 20;
+    y_start = 18;
 
     coordinates[0] = {{0, 2}, {1, 2}, {2, 2}, {3, 2}};
     coordinates[1] = {{2, 0}, {2, 1}, {2, 2}, {2, 3}};
@@ -24,14 +38,37 @@ struct I : Termino {
     coordinates[3] = {{1, 0}, {1, 1}, {1, 2}, {1, 3}};
 
     colour_map_key = 1;
+
+    set_kick_data();
   }
   ~I() {}
+
+  // I piece kick data with arika's modifications
+  // the I piece is the only piece along side the O piece that has different wall kick data
+  void set_kick_data() override {
+    // default -> right position
+    wall_kick_data[{0, 1}] = {{-2,0}, {+1,0}, {+1,+2}, {-2, -1}};
+    // right -> default position
+    wall_kick_data[{1, 0}] = {{+2,0}, {-1,0}, {+2,+1}, {-1, -2}};
+    // right -> upside down position
+    wall_kick_data[{1, 2}] = {{-1,0}, {+2,0}, {-1,+2}, {+2, -1}};
+    // upside down -> right position
+    wall_kick_data[{2, 1}] = {{-2,0}, {+1,0}, {-2,+1}, {+1, -1}};
+    //  upside down -> left position
+    wall_kick_data[{2, 3}] = {{+2,0}, {-1,0}, {+2,+1}, {-1, -1}};
+    // ledt -> upside down position
+    wall_kick_data[{3, 2}] = {{+1,0}, {-2,0}, {+1,+2}, {-2, -1}};
+    // left ->  default position
+    wall_kick_data[{3, 0}] = {{-2,0}, {+1,0}, {-2,+1}, {+1, -2}};
+    // default -> left position
+    wall_kick_data[{0, 3}] = {{+2,0}, {-1,0}, {-1,+2}, {+2, -1}};
+  }
 } I;
 
 struct J : Termino {
   J() {
     x_start = 3;
-    y_start = 20;
+    y_start = 19;
 
     coordinates[0] = {{0, 1}, {0, 2}, {1, 1}, {2, 1}};
     coordinates[1] = {{1, 0}, {1, 1}, {1, 2}, {2, 2}};
@@ -46,7 +83,7 @@ struct J : Termino {
 struct L : Termino {
   L() {
     x_start = 3;
-    y_start = 20;
+    y_start = 19;
 
     coordinates[0] = {{0, 1}, {1, 1}, {2, 1}, {2, 2}};
     coordinates[1] = {{1, 0}, {1, 1}, {1, 2}, {2, 0}};
@@ -60,7 +97,7 @@ struct L : Termino {
 
 struct O : Termino {
   O() {
-    x_start = 3;
+    x_start = 4;
     y_start = 20;
 
     coordinates[0] = {{0, 0}, {0, 1}, {1, 0}, {1, 1}};
@@ -69,14 +106,28 @@ struct O : Termino {
     coordinates[3] = {{0, 0}, {0, 1}, {1, 0}, {1, 1}};
 
     colour_map_key = 4;
+
+    set_kick_data();
   }
   ~O() {}
+
+  void set_kick_data() override {
+    // default -> right position
+    wall_kick_data[{0, 1}] = {{0,0}, {0,0}, {0,0}, {0, 0}};
+    wall_kick_data[{1, 0}] = {{0,0}, {0,0}, {0,0}, {0, 0}};
+    wall_kick_data[{1, 2}] = {{0,0}, {0,0}, {0,0}, {0, 0}};
+    wall_kick_data[{2, 1}] = {{0,0}, {0,0}, {0,0}, {0, 0}};
+    wall_kick_data[{2, 3}] = {{0,0}, {0,0}, {0,0}, {0, 0}};
+    wall_kick_data[{3, 2}] = {{0,0}, {0,0}, {0,0}, {0, 0}};
+    wall_kick_data[{3, 0}] = {{0,0}, {0,0}, {0,0}, {0, 0}};
+    wall_kick_data[{0, 3}] = {{0,0}, {0,0}, {0,0}, {0, 0}};
+  }
 } O;
 
 struct Z : Termino {
   Z() {
     x_start = 3;
-    y_start = 20;
+    y_start = 19;
 
     coordinates[0] = {{0, 1}, {1, 1}, {1, 2}, {2, 2}};
     coordinates[1] = {{1, 2}, {1, 1}, {2, 1}, {2, 0}};
@@ -91,7 +142,7 @@ struct Z : Termino {
 struct T : Termino {
   T() {
     x_start = 3;
-    y_start = 20;
+    y_start = 19;
 
     coordinates[0] = {{0, 1}, {1, 1}, {2, 1}, {1, 2}};
     coordinates[1] = {{1, 0}, {1, 1}, {1, 2}, {2, 1}};
@@ -106,7 +157,7 @@ struct T : Termino {
 struct S : Termino {
   S() {
     x_start = 3;
-    y_start = 20;
+    y_start = 19;
 
     coordinates[0] = {{0, 2}, {1, 2}, {1, 1}, {2, 1}};
     coordinates[1] = {{1, 0}, {1, 1}, {2, 1}, {2, 2}};

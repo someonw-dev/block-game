@@ -71,5 +71,9 @@ void set_render_colour(SDL_Renderer *renderer, Colours colour) {
       SDL_SetRenderDrawColor(renderer, 0, 0, 0, 0);
       break;
     }
+    case LIGHT_GRAY: {
+      SDL_SetRenderDrawColor(renderer, 150, 150, 150, 255);
+      break;
+    }
   }
 }

@@ -40,6 +40,7 @@ private:
   void move_cubes();
   void clear_row();
 
+  bool swap;
   int rotation;
   Termino *termino;
   Cube termino_cubes[4];
