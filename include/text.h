@@ -28,8 +28,16 @@ public:
     float ratio = w/currentWidth;
     region.w = w;
     region.h = currentHeight * ratio;
+
+  std::cout << "text created" << std::endl;
   }
-  ~Text() {}
+  ~Text() {
+    std::cout << "text destroyed" << std::endl;
+  }
+
+  void update_text() {
+
+  }
 
   void render(SDL_Renderer *renderer) override {
     //SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);

@@ -43,6 +43,7 @@ private:
   bool swap;
   int rotation;
   Termino *termino;
+  // these are technically being made instantly and are thus always in memory until you close the application but i am NOT fixing that now
   Cube termino_cubes[4];
   Termino *saved_termino;
   Cube saved_cubes[4];

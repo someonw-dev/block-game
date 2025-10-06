@@ -13,7 +13,8 @@ public:
   }
 
   // default constructor mainly for arrays
-  Cube() : Object(0, 0, 10, 10) {}
+  Cube() : Object(0, 0, 10, 10) {
+  }
  ~Cube() {}
 
   void render(SDL_Renderer *renderer) override {

@@ -18,19 +18,27 @@ public:
     region = {x, y, w, h};
     z_index = 0;
   }
-  ~Object() {
+  virtual ~Object() {
   };
 
   void set_z_axis(int z) {
     z_index = z;
   }
 
-  void set_y(int y) {
+  void set_y(float y) {
     region.y = y;
   }
 
-  void set_x(int x) {
+  void set_x(float x) {
     region.x = x;
+  }
+
+  float get_width() {
+    return region.w;
+  }
+
+  float get_height() {
+    return region.h;
   }
 
   virtual void render(SDL_Renderer *renderer) {};

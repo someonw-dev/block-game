@@ -1,14 +1,15 @@
 // header gaurd
 #pragma once
 
-#include "object.h"
 #include <SDL3/SDL.h>
 #include <SDL3/SDL_events.h>
 #include <SDL3/SDL_oldnames.h>
 #include <SDL3/SDL_rect.h>
 #include <SDL3/SDL_render.h>
 #include <SDL3/SDL_stdinc.h>
-#include <iostream>
+#include <memory>
+#include "object.h"
+#include "text.h"
 
 class Button : public Object
 {
@@ -39,12 +40,22 @@ public:
   void render(SDL_Renderer *renderer) {
     renderColour(renderer);
     SDL_RenderFillRect(renderer, &region);
+    if (caption) {
+      caption->render(renderer);
+    }
+  }
+
+  void set_text(std::unique_ptr<Text> text) {
+    caption = std::move(text);
+    caption->set_x(region.x + region.w * 0.5 - caption->get_width() * 0.5);
+    caption->set_y(region.y + region.h * 0.5 - caption->get_height() * 0.5);
   }
 
 
 private:
   bool hover;
   void(*callback)();
+  std::unique_ptr<Text> caption = nullptr;
 
   bool in_button(SDL_FPoint cursor) {
     if (SDL_PointInRectFloat(&cursor, &region)) {
