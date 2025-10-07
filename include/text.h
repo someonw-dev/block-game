@@ -28,15 +28,28 @@ public:
     float ratio = w/currentWidth;
     region.w = w;
     region.h = currentHeight * ratio;
-
-  std::cout << "text created" << std::endl;
   }
   ~Text() {
-    std::cout << "text destroyed" << std::endl;
   }
 
-  void update_text() {
+  void update_text(const char *output, SDL_Renderer *renderer) {
+    SDL_Color color = {0, 0, 0, SDL_ALPHA_OPAQUE};
+    SDL_Color bg = {255, 255, 255, SDL_ALPHA_OPAQUE};
 
+    ////text = TTF_RenderText_Shaded(fonts::default_font, output, 0, color, bg);
+    text = TTF_RenderText_Blended(fonts::default_font, output, 0, color);
+    if (text) {
+      texture = SDL_CreateTextureFromSurface(renderer, text);
+      SDL_DestroySurface(text);
+    }
+
+    float currentWidth;
+    float currentHeight;
+
+    SDL_GetTextureSize(texture, &currentWidth, &currentHeight);
+    float ratio = region.h/currentHeight;
+    region.w = currentWidth * ratio;;
+    region.h = region.h;
   }
 
   void render(SDL_Renderer *renderer) override {

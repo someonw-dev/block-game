@@ -20,13 +20,17 @@ public:
   void rotate_left();
   void rotate_right();
   void rotate(int r);
-  void checkRotation();
   bool move(int relative_x, int relative_y);
   void quick_place();
   void move_down();
   void place_termino();
   void render(SDL_Renderer *renderer) override;
   void swap_active_piece();
+  bool next_down_is_place();
+
+  int get_level();
+  void set_level();
+  const char* get_score();
 
 private:
   std::vector<int> get_unique_y();
@@ -55,4 +59,5 @@ private:
   int X;
   int Y;
   int score;
+  int level;
 };

@@ -48,11 +48,13 @@ void StartMenu::init() {
   btnPlay->set_text(std::make_unique<Text>("PLAY", 0, 0, 65, SceneManager::getInstance().get_renderer()));
   push_obj(btnPlay);
 
+  /*
   Button *btnSettings = new Button(BUTTON_CENTER, centerY + 50, WIDTH, HEIGHT, &settings);
   btnSettings->set_text(std::make_unique<Text>("SETTINGS", 0, 0, 120, SceneManager::getInstance().get_renderer()));
   push_obj(btnSettings);
+  */
 
-  Button *btnQuit = new Button(BUTTON_CENTER, centerY + 150, WIDTH, HEIGHT, &quit);
+  Button *btnQuit = new Button(BUTTON_CENTER, centerY + 50, WIDTH, HEIGHT, &quit);
   btnQuit->set_text(std::make_unique<Text>("QUIT", 0, 0, 65, SceneManager::getInstance().get_renderer()));
   push_obj(btnQuit);
 

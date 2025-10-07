@@ -15,5 +15,11 @@ public:
   void on_render(SDL_Renderer *renderer) override;
   void on_event(SDL_Event *event) override;
 
+  std::vector<Object*> paused_objects;
+
+  void push_paused_object(Object *obj) {
+    paused_objects.push_back(obj);
+  };
+
   int arrData[10][40] = {0};
 };

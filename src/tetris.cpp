@@ -15,11 +15,15 @@
 int arrTetris[10][40];
 TetrisDisplay display = {constants::TETRIS_X, constants::TETRIS_Y, constants::TETRIS_WIDTH};
 
+
+
 // at first i was updating the array as the termino was moving down but then i realised
 // i really just... dont have to do that lmao
 Tetris::Tetris() : Object(0, 0, 0, 0) {
   termino_init();
   rotation = 0;
+  swap = true;
+  level = 5;
 
   for (Cube &i : termino_cubes) {
     i.set_width(constants::TETRIS_CUBE_WIDTH);
@@ -46,6 +50,14 @@ Tetris::Tetris() : Object(0, 0, 0, 0) {
   move_cubes();
 }
 Tetris::~Tetris() {}
+
+const char* Tetris::get_score() {
+  // technically if you get your score to 94 digits this *could* crash but there is no way you are getting to that amount
+  static char str[100];
+  strcpy(str, "Score: ");
+  strcat(str, std::to_string(score).c_str());
+  return str;
+}
 
 // call rotate (+1/-1) rotate -> check test conditions and use first one that works -> if they all fail dont rotate
 void Tetris::rotate_left() {
@@ -103,10 +115,20 @@ bool Tetris::move(int relative_x, int relative_y) {
 }
 
 void Tetris::quick_place() {
-  Y -= get_y_intersect();
+  int drop = get_y_intersect();
+  score += drop*2;
+  Y -= drop;
   place_termino();
 }
 
+bool Tetris::next_down_is_place()
+{
+  if (check_valid(X, Y - 1, rotation)) {
+    return true;
+  }
+
+  return false;
+}
 void Tetris::move_down() {
   // if a down move is not valid it should place down the tile
   if (!move(0, -1)) {
@@ -131,6 +153,7 @@ void Tetris::place_termino() {
 void Tetris::clear_row() {
   std::vector<int> rows = get_unique_y();
 
+  int counter = 0;
   for (int &i: rows) {
     bool filled = true;
     for (int k = 0; k<constants::MAX_WIDTH; k++) {
@@ -141,11 +164,31 @@ void Tetris::clear_row() {
     }
 
     if (filled) {
+      ++counter;
       for (int k = i; k<constants::MAX_HEIGHT - 1; k++) {
         for (int j = 0; j<constants::MAX_WIDTH; j++) {
           arrTetris[j][k] = arrTetris[j][k + 1];
         }
       }
+    }
+  }
+
+  switch (counter) {
+    case 1: {
+      score += 100 * level;
+      break;
+    }
+    case 2: {
+      score += 300 * level;
+      break;
+    }
+    case 3: {
+      score += 500 * level;
+      break;
+    }
+    case 4: {
+      score += 800 * level;
+      break;
     }
   }
 }
@@ -173,7 +216,7 @@ void Tetris::swap_active_piece() {
       set_new_termino();
       move_cubes();
     }
-    const float SAVED_X = constants::TETRIS_X - 200;
+    const float SAVED_X = constants::TETRIS_X - constants::TETRIS_CUBE_WIDTH * 4 - 30;
     for (int i = 0; i < 4; i++) {
       saved_cubes[i].set_x(SAVED_X + constants::TETRIS_CUBE_WIDTH*(saved_termino->coordinates[0][i].x));
       saved_cubes[i].set_y(200 - constants::TETRIS_CUBE_WIDTH*(saved_termino->coordinates[0][i].y));
