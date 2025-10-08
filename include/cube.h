@@ -49,7 +49,7 @@ public:
 
 private:
   SDL_FRect inner;
-  static const int BORDER = 2;
+  static const int BORDER = 3;
   Colours icolour = GRAY;
   Colours bcolour = BLACK;
 };

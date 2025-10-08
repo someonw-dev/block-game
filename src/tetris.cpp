@@ -15,8 +15,6 @@
 int arrTetris[10][40];
 TetrisDisplay display = {constants::TETRIS_X, constants::TETRIS_Y, constants::TETRIS_WIDTH};
 
-
-
 // at first i was updating the array as the termino was moving down but then i realised
 // i really just... dont have to do that lmao
 Tetris::Tetris() : Object(0, 0, 0, 0) {

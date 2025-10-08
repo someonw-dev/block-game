@@ -20,18 +20,25 @@ void TetrisDisplay::render(SDL_Renderer *renderer) {
   // rendered first so that the other ones will draw on top of it
   SDL_RenderFillRect(renderer, &region);
 
+  SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_BLEND);
   for (int i = 0; i<constants::MAX_WIDTH; i++) {
     for (int k = 0; k<constants::MAX_HEIGHT; k++) {
       arrCubes[i][k].render(renderer);
     }
   }
+  SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_NONE);
 }
 
 // should be called anytime the board info changes
 void TetrisDisplay::updateColours(int (*arrData)[10][40]) {
   for (int i = 0; i<constants::MAX_WIDTH; i++) {
     for (int k = 0; k<constants::MAX_HEIGHT; k++) {
-      arrCubes[i][k].set_colour(colour_map[(*arrData)[i][k]][0], colour_map[(*arrData)[i][k]][1]);
+      //arrCubes[i][k].set_colour(colour_map[(*arrData)[i][k]][0], colour_map[(*arrData)[i][k]][1]);
+      if ((*arrData)[i][k] == 0) {
+        arrCubes[i][k].set_colour(INVISIBLE, INVISIBLE);
+      } else {
+        arrCubes[i][k].set_colour(colour_map[(*arrData)[i][k]][0], BLACK);
+      }
     }
   }
 }

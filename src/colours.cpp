@@ -69,9 +69,7 @@ void set_render_colour(SDL_Renderer *renderer, Colours colour) {
       break;
     }
     case INVISIBLE: {
-      SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_BLEND);
-      SDL_SetRenderDrawColor(renderer, 0, 0, 0, 100);
-      SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_NONE);
+      SDL_SetRenderDrawColor(renderer, 0, 0, 0, 0);
       break;
     }
     case LIGHT_GRAY: {

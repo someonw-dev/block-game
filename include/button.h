@@ -33,7 +33,7 @@ public:
     const int MARGIN = 3;
 
     highlight[0].x = x + MARGIN;
-    highlight[0].y = y + MARGIN + height * 0.8;
+    highlight[0].y = y + MARGIN + height * 0.7;
     highlight[1].x = highlight[0].x;
     highlight[1].y = y + MARGIN;
     highlight[2].x = highlight[0].x + width - MARGIN * 2 - SHADOW_RIGHT_WIDTH;

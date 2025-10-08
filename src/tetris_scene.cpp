@@ -23,11 +23,13 @@
 
 Tetris terminomino;
 static bool paused = false;
+static bool first_session = false;
 
 // constructor
 TetrisScene::TetrisScene() : Scene("Tetris") {
   init();
 }
+
 TetrisScene::~TetrisScene() {
     for (Object *i : paused_objects) {
       delete i;
@@ -53,14 +55,6 @@ void return_button() {
   // should take you to the level select
   //SceneManager::getInstance().transition(std::make_unique<StartMenu>());
   SceneManager::getInstance().return_scene();
-}
-
-void quit_tetris() {
-  // pushes a quit event
-  SDL_Event event;
-  SDL_zero(event);
-  event.type = SDL_EVENT_QUIT;
-  SDL_PushEvent(&event);
 }
 
 Text *score;
