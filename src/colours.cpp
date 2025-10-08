@@ -1,4 +1,5 @@
 #include "../include/colours.h"
+#include <SDL3/SDL_blendmode.h>
 #include <SDL3/SDL_render.h>
 
 void set_render_colour(SDL_Renderer *renderer, Colours colour) {
@@ -68,7 +69,9 @@ void set_render_colour(SDL_Renderer *renderer, Colours colour) {
       break;
     }
     case INVISIBLE: {
-      SDL_SetRenderDrawColor(renderer, 0, 0, 0, 0);
+      SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_BLEND);
+      SDL_SetRenderDrawColor(renderer, 0, 0, 0, 100);
+      SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_NONE);
       break;
     }
     case LIGHT_GRAY: {

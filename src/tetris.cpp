@@ -23,6 +23,7 @@ Tetris::Tetris() : Object(0, 0, 0, 0) {
   termino_init();
   rotation = 0;
   swap = true;
+  lost = true;
   level = 5;
 
   for (Cube &i : termino_cubes) {
@@ -46,17 +47,16 @@ Tetris::Tetris() : Object(0, 0, 0, 0) {
     i.set_y(-50);
   }
 
-  set_new_termino();
-  move_cubes();
 }
 Tetris::~Tetris() {}
 
-const char* Tetris::get_score() {
-  // technically if you get your score to 94 digits this *could* crash but there is no way you are getting to that amount
-  static char str[100];
-  strcpy(str, "Score: ");
-  strcat(str, std::to_string(score).c_str());
-  return str;
+bool Tetris::is_running() {
+  // if lost = true running is false 
+  return !lost;
+}
+
+int Tetris::get_score() {
+  return score;
 }
 
 // call rotate (+1/-1) rotate -> check test conditions and use first one that works -> if they all fail dont rotate
@@ -121,7 +121,7 @@ void Tetris::quick_place() {
   place_termino();
 }
 
-bool Tetris::next_down_is_place()
+bool Tetris::next_fall_is_place()
 {
   if (check_valid(X, Y - 1, rotation)) {
     return true;
@@ -129,7 +129,19 @@ bool Tetris::next_down_is_place()
 
   return false;
 }
+
+// also known as a soft drop
 void Tetris::move_down() {
+
+  score += 1;
+
+  // if a down move is not valid it should place down the tile
+  if (!move(0, -1)) {
+    place_termino();
+  }
+}
+
+void Tetris::fall() {
   // if a down move is not valid it should place down the tile
   if (!move(0, -1)) {
     place_termino();
@@ -147,7 +159,7 @@ void Tetris::place_termino() {
   swap = true;
   // move termino back up, get new termino, check for line clears
   set_new_termino();
-  move_cubes();
+  //move_cubes();
 }
 
 void Tetris::clear_row() {
@@ -193,6 +205,14 @@ void Tetris::clear_row() {
   }
 }
 
+void Tetris::start() {
+  full_clear();
+  display.updateColours(&arrTetris);
+  set_new_termino();
+  move_cubes();
+
+  lost = false;
+}
 
 void Tetris::swap_active_piece() {
   // if there is a saved termino
@@ -305,22 +325,41 @@ void Tetris::set_new_termino() {
   termino = get_next_termino();
   preview = get_preview_termino();
 
-  set_termino_colours();
 
   if (!check_valid(termino->x_start, termino->y_start, 0)) {
-    std::cout << "you lost :(" << std::endl;
+    lost = true;
+  } else {
+    set_termino_colours();
+
+    Y = termino->y_start;
+    X = termino->x_start;
+    rotation = 0;
+
+    const float PREVIEW_X = constants::TETRIS_X + constants::TETRIS_WIDTH + 30;
+    for (int i = 0; i < 4; i++) {
+      preview_cubes[i].set_x(PREVIEW_X + constants::TETRIS_CUBE_WIDTH*(preview->coordinates[rotation][i].x));
+      preview_cubes[i].set_y(200 - constants::TETRIS_CUBE_WIDTH*(preview->coordinates[rotation][i].y));
+    }
+
+    move_cubes();
   }
+}
 
-  Y = termino->y_start;
-  X = termino->x_start;
-  rotation = 0;
 
-  const float PREVIEW_X = constants::TETRIS_X + constants::TETRIS_WIDTH + 30;
-  for (int i = 0; i < 4; i++) {
-    preview_cubes[i].set_x(PREVIEW_X + constants::TETRIS_CUBE_WIDTH*(preview->coordinates[rotation][i].x));
-    preview_cubes[i].set_y(200 - constants::TETRIS_CUBE_WIDTH*(preview->coordinates[rotation][i].y));
+void Tetris::full_clear() {
+  for (int i = 0; i < 10; i++) {
+    for (int k = 0; k < 40; k++) {
+      arrTetris[i][k] = 0;
+    }
   }
+}
 
+int Tetris::get_level() {
+  return level;
+}
+
+void Tetris::set_level(int new_level) {
+  level = new_level;
 }
 
 std::vector<int> Tetris::get_unique_y() {

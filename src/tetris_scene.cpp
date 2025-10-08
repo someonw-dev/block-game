@@ -28,7 +28,18 @@ static bool paused = false;
 TetrisScene::TetrisScene() : Scene("Tetris") {
   init();
 }
-TetrisScene::~TetrisScene() {}
+TetrisScene::~TetrisScene() {
+    for (Object *i : paused_objects) {
+      delete i;
+  }
+    for (Object *i : lost_objects) {
+      delete i;
+  }
+}
+
+void start_game() {
+  terminomino.start();
+}
 
 void resume() {
   paused = false;
@@ -53,6 +64,7 @@ void quit_tetris() {
 }
 
 Text *score;
+Text *level;
 
 void TetrisScene::init() {
   const float centerX = constants::SCREEN_WIDTH / 2.0;
@@ -64,9 +76,14 @@ void TetrisScene::init() {
 
   //push_obj(new TetrisDisplay(constants::TETRIS_X, constants::TETRIS_Y, constants::TETRIS_WIDTH));
 
-  score = new Text("Score: 0", constants::TETRIS_X +constants::TETRIS_WIDTH + 10, 100, 100, SceneManager::getInstance().get_renderer());
+  const float TETRIS_RIGHT = constants::TETRIS_X + constants::TETRIS_WIDTH;
+  const float RIGHT_MARGIN = 20;
+
+  score = new Text("Score: 0", TETRIS_RIGHT + RIGHT_MARGIN, 230, 140, SceneManager::getInstance().get_renderer());
   push_obj(score);
 
+  level = new Text("Level: 1", TETRIS_RIGHT + RIGHT_MARGIN, 270, 80, SceneManager::getInstance().get_renderer());
+  push_obj(level);
   const float WIDTH = 150;
   const float HEIGHT = 60;
   const float BUTTON_CENTER = centerX - WIDTH * 0.5;
@@ -82,6 +99,9 @@ void TetrisScene::init() {
   btnBack->set_text(std::make_unique<Text>("Back", 0, 0, 60, SceneManager::getInstance().get_renderer()));
   push_paused_object(btnBack);
 
+  Button *btnRestart = new Button(TETRIS_RIGHT + RIGHT_MARGIN, centerY + 50, 100, 40, &start_game);
+  btnRestart->set_text(std::make_unique<Text>("Start", 0, 0, 60, SceneManager::getInstance().get_renderer()));
+  push_lost_object(btnRestart);
   /*
   Button *btnExit= new Button(BUTTON_CENTER, centerY + 150, WIDTH, HEIGHT, &quit_tetris);
   btnExit->set_text(std::make_unique<Text>("Quit", 0, 0, 50, SceneManager::getInstance().get_renderer()));
@@ -93,8 +113,24 @@ void TetrisScene::init() {
 void TetrisScene::on_render(SDL_Renderer *renderer) {
   //SDL_RenderLine(renderer, 0, 0, 50, 50);
 
-  score->update_text(terminomino.get_score(), renderer);
+  static int score_value;
+
+  // only update the text if it has changed since this can be a little expensive
+  if (score_value != terminomino.get_score()) {
+    score_value = terminomino.get_score();
+    static char str[100];
+    strcpy(str, "Score: ");
+    strcat(str, std::to_string(score_value).c_str());
+    score->update_text(str, renderer);
+  }
   terminomino.render(renderer);
+
+
+  if (!terminomino.is_running()) {
+    for (Object *i : lost_objects) {
+      i->render(renderer);
+    }
+  }
 
   if (paused) {
     SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_BLEND);
@@ -110,22 +146,34 @@ void TetrisScene::on_render(SDL_Renderer *renderer) {
 }
 
 void TetrisScene::update() {
-  const bool* keys = SDL_GetKeyboardState(NULL);
 
   static Uint64 start_time = SDL_GetTicks();
-  static int level = 5;
+  int level = terminomino.get_level();
 
-  // TODO: on down arrow reset timer also if next down move will place the tile and you move gives you a little extra time
+  // =======================
+  // ======== input ========
+  // =======================
+
+  const bool* keys = SDL_GetKeyboardState(NULL);
+
+
+
+
+
   // === game logic ===
   Uint64 end = SDL_GetTicks();
 
   // *1000 to get time in miliseconds
   float time = std::pow(0.8-(level-1)*0.007, level-1) * 1000;
+
+  // on left/right/rotate if it is next_fall_place do the mercy period
+  // on down, quick_place, swap active piece reset start_time
+
   if (end > start_time + time) {
     start_time = SDL_GetTicks();
 
-    if (!paused) {
-      terminomino.move_down();
+    if (!paused && terminomino.is_running()) {
+      terminomino.fall();
     }
   }
 }
@@ -133,7 +181,7 @@ void TetrisScene::update() {
 void TetrisScene::on_event(SDL_Event *event) {
   // TODO: write this in update so that the presses feel better
   if (event->type == SDL_EVENT_KEY_DOWN) {
-    if (!paused) {
+    if (!paused && terminomino.is_running()) {
       if (event->key.scancode == SDL_SCANCODE_LEFT) {
         terminomino.move(-1, 0);
       }
@@ -159,7 +207,11 @@ void TetrisScene::on_event(SDL_Event *event) {
     if (event->key.scancode == SDL_SCANCODE_ESCAPE) {
       paused = !paused;
     }
-    if (paused) {
+  }
+
+  if (!terminomino.is_running() && !paused) {
+    for (Object *i : lost_objects) {
+      i->on_event(event);
     }
   }
 

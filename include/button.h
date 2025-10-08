@@ -17,6 +17,28 @@ public:
   //Bjarne Stroustrup the inventor of C++ suggests to use public first and then private.
   // ==== Constructor ====
   Button(float x, float y, float width, float height, void(*callbackFunc)()) : Object(x, y, width, height){
+    const int SHADOW_BOTTOM_HEIGHT = 6;
+    shadow_bottom.w = width;
+    shadow_bottom.x = x;
+    shadow_bottom.y = y + height - SHADOW_BOTTOM_HEIGHT;
+    shadow_bottom.h = SHADOW_BOTTOM_HEIGHT;
+
+    const int SHADOW_RIGHT_WIDTH = 4;
+    shadow_right.w = SHADOW_RIGHT_WIDTH;
+    shadow_right.x = x + width - SHADOW_RIGHT_WIDTH;
+    shadow_right.y = y;
+    shadow_right.h = height;
+
+
+    const int MARGIN = 3;
+
+    highlight[0].x = x + MARGIN;
+    highlight[0].y = y + MARGIN + height * 0.8;
+    highlight[1].x = highlight[0].x;
+    highlight[1].y = y + MARGIN;
+    highlight[2].x = highlight[0].x + width - MARGIN * 2 - SHADOW_RIGHT_WIDTH;
+    highlight[2].y = highlight[1].y;
+
     callback = callbackFunc;
   }
   Button(float x, float y, float width, float height, int z, void(*callbackFunc)()) : Object(x, y, width, height, z){
@@ -38,8 +60,16 @@ public:
   }
 
   void render(SDL_Renderer *renderer) {
-    renderColour(renderer);
+    main_colour(renderer);
     SDL_RenderFillRect(renderer, &region);
+
+    shadow_colour(renderer);
+    SDL_RenderFillRect(renderer, &shadow_bottom);
+    SDL_RenderFillRect(renderer, &shadow_right);
+
+    highlight_colour(renderer);
+    SDL_RenderLines(renderer, highlight, 3);
+
     if (caption) {
       caption->render(renderer);
     }
@@ -56,16 +86,20 @@ private:
   bool hover;
   void(*callback)();
   std::unique_ptr<Text> caption = nullptr;
+  SDL_FRect shadow_bottom;
+  SDL_FRect shadow_right;
+  SDL_FPoint highlight[3];
 
   bool in_button(SDL_FPoint cursor) {
     if (SDL_PointInRectFloat(&cursor, &region)) {
       return true;
     } else {
+
       return false;
     }
   }
 
-  void renderColour(SDL_Renderer *renderer) {
+  void main_colour(SDL_Renderer *renderer) {
     if (hover == true) {
       SDL_SetRenderDrawColor(renderer, 5, 30, 220, 255);
     } else {
@@ -73,4 +107,19 @@ private:
     }
   }
 
+  void shadow_colour(SDL_Renderer *renderer) {
+    if (hover == true) {
+      SDL_SetRenderDrawColor(renderer, 10, 10, 150, 255);
+    } else {
+      SDL_SetRenderDrawColor(renderer, 50, 50, 150, 255);
+    }
+  }
+
+  void highlight_colour(SDL_Renderer *renderer) {
+    if (hover == true) {
+      SDL_SetRenderDrawColor(renderer, 50, 50, 255, 255);
+    } else {
+      SDL_SetRenderDrawColor(renderer, 100, 100, 255, 255);
+    }
+  }
 };

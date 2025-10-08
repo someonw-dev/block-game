@@ -19,6 +19,7 @@ public:
     if (text) {
       texture = SDL_CreateTextureFromSurface(renderer, text);
       SDL_DestroySurface(text);
+      text = NULL;
     }
 
     float currentWidth;
@@ -39,8 +40,18 @@ public:
     ////text = TTF_RenderText_Shaded(fonts::default_font, output, 0, color, bg);
     text = TTF_RenderText_Blended(fonts::default_font, output, 0, color);
     if (text) {
+      // this annoyed me so much
+      // you cant just delete the texture cause sdl_ttf does that for you
+      // which causes it to core dump because you are deleting a pointer twice
+      // so you need to call their delete texture
+      // also im doing this here because if you dont do it here, it will keep them all lmfao
+      // then it murders them all when you close the application and if this was called a lot it can take a lil bit
+      if (texture) {
+        SDL_DestroyTexture(texture);
+      }
       texture = SDL_CreateTextureFromSurface(renderer, text);
       SDL_DestroySurface(text);
+      text = NULL;
     }
 
     float currentWidth;

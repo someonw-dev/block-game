@@ -60,7 +60,7 @@ SDL_AppResult SDL_AppInit(void **appstate, int argc, char *argv[])
     return SDL_APP_FAILURE;
   }
 
-  fonts::default_font = TTF_OpenFontIO(SDL_IOFromConstMem(ByteBounce_ttf, ByteBounce_ttf_len), true, 100.0f);
+  fonts::default_font = TTF_OpenFontIO(SDL_IOFromConstMem(ByteBounce_ttf, ByteBounce_ttf_len), true, 300.0f);
   if (!fonts::default_font) {
     SDL_Log("Couldn't open font: %s\n", SDL_GetError());
     return SDL_APP_FAILURE;

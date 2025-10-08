@@ -23,14 +23,17 @@ public:
   bool move(int relative_x, int relative_y);
   void quick_place();
   void move_down();
+  void fall();
   void place_termino();
   void render(SDL_Renderer *renderer) override;
   void swap_active_piece();
-  bool next_down_is_place();
+  bool next_fall_is_place();
+  void start();
 
+  bool is_running();
   int get_level();
-  void set_level();
-  const char* get_score();
+  void set_level(int new_level);
+  int get_score();
 
 private:
   std::vector<int> get_unique_y();
@@ -43,6 +46,7 @@ private:
   void set_new_termino();
   void move_cubes();
   void clear_row();
+  void full_clear();
 
   bool swap;
   int rotation;
@@ -60,4 +64,7 @@ private:
   int Y;
   int score;
   int level;
+  int max_level;
+  int highest_scores[10];
+  bool lost;
 };
