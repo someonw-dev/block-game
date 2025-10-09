@@ -20,7 +20,8 @@ enum Colours {
   DARK_AQUA,
   BLACK,
   INVISIBLE,
-  LIGHT_GRAY
+  LIGHT_GRAY,
+  WHITE
 };
 
 void set_render_colour(SDL_Renderer *renderer, Colours colour);

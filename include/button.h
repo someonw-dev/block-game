@@ -7,6 +7,7 @@
 #include <SDL3/SDL_rect.h>
 #include <SDL3/SDL_render.h>
 #include <SDL3/SDL_stdinc.h>
+#include <iterator>
 #include <memory>
 #include "object.h"
 #include "text.h"
@@ -17,26 +18,39 @@ public:
   //Bjarne Stroustrup the inventor of C++ suggests to use public first and then private.
   // ==== Constructor ====
   Button(float x, float y, float width, float height, void(*callbackFunc)()) : Object(x, y, width, height){
-    const int SHADOW_BOTTOM_HEIGHT = 6;
-    shadow_bottom.w = width;
-    shadow_bottom.x = x;
-    shadow_bottom.y = y + height - SHADOW_BOTTOM_HEIGHT;
-    shadow_bottom.h = SHADOW_BOTTOM_HEIGHT;
+    inner = {x + BORDER, y + BORDER, width - BORDER*2, height-BORDER*2};
 
-    const int SHADOW_RIGHT_WIDTH = 4;
-    shadow_right.w = SHADOW_RIGHT_WIDTH;
-    shadow_right.x = x + width - SHADOW_RIGHT_WIDTH;
-    shadow_right.y = y;
-    shadow_right.h = height;
+    int inner_x = x + BORDER;
+    int inner_y = y + BORDER;
 
+    float size_mod;
+    if (width > height) {
+      size_mod = width * 0.05;
+    } else {
+      size_mod = height * 0.05;
+    }
+    const float SHADOW_LENGTH = size_mod;
+    shadow_bottom.w = width - BORDER*2;
+    shadow_bottom.x = inner_x;
+    shadow_bottom.y = y + height - SHADOW_LENGTH - BORDER;
+    shadow_bottom.h = SHADOW_LENGTH;
 
-    const int MARGIN = 3;
+    shadow_right.w = SHADOW_LENGTH;
+    shadow_right.x = x + width - SHADOW_LENGTH - BORDER;
+    shadow_right.y = inner_y;
+    shadow_right.h = height - BORDER * 2;
 
-    highlight[0].x = x + MARGIN;
-    highlight[0].y = y + MARGIN + height * 0.7;
-    highlight[1].x = highlight[0].x;
-    highlight[1].y = y + MARGIN;
-    highlight[2].x = highlight[0].x + width - MARGIN * 2 - SHADOW_RIGHT_WIDTH;
+    const float HIGHLIGHT_LENGTH = size_mod;
+
+    highlight[0].x = inner_x;
+    highlight[0].y = inner_y;
+    highlight[0].w = HIGHLIGHT_LENGTH * 5;
+    highlight[0].h = HIGHLIGHT_LENGTH;
+    highlight[1].y = inner_y;
+    highlight[1].x = inner_x;
+    highlight[1].w = HIGHLIGHT_LENGTH;
+    highlight[1].h = HIGHLIGHT_LENGTH * 3;
+    highlight[2].x = highlight[0].x + width ;
     highlight[2].y = highlight[1].y;
 
     callback = callbackFunc;
@@ -60,15 +74,20 @@ public:
   }
 
   void render(SDL_Renderer *renderer) {
-    main_colour(renderer);
+    SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
     SDL_RenderFillRect(renderer, &region);
+
+    main_colour(renderer);
+    SDL_RenderFillRect(renderer, &inner);
 
     shadow_colour(renderer);
     SDL_RenderFillRect(renderer, &shadow_bottom);
     SDL_RenderFillRect(renderer, &shadow_right);
 
     highlight_colour(renderer);
-    SDL_RenderLines(renderer, highlight, 3);
+    for (SDL_FRect &i: highlight) {
+      SDL_RenderFillRect(renderer, &i);
+    }
 
     if (caption) {
       caption->render(renderer);
@@ -82,13 +101,16 @@ public:
   }
 
 
+
 private:
   bool hover;
+  const int BORDER = 5;
   void(*callback)();
   std::unique_ptr<Text> caption = nullptr;
   SDL_FRect shadow_bottom;
   SDL_FRect shadow_right;
-  SDL_FPoint highlight[3];
+  SDL_FRect inner;
+  SDL_FRect highlight[3];
 
   bool in_button(SDL_FPoint cursor) {
     if (SDL_PointInRectFloat(&cursor, &region)) {
@@ -101,25 +123,25 @@ private:
 
   void main_colour(SDL_Renderer *renderer) {
     if (hover == true) {
-      SDL_SetRenderDrawColor(renderer, 5, 30, 220, 255);
+      SDL_SetRenderDrawColor(renderer, 0, 216, 189, 255);
     } else {
-      SDL_SetRenderDrawColor(renderer, 10, 50, 250, 255);
+      SDL_SetRenderDrawColor(renderer, 0, 255, 223, 255);
     }
   }
 
   void shadow_colour(SDL_Renderer *renderer) {
     if (hover == true) {
-      SDL_SetRenderDrawColor(renderer, 10, 10, 150, 255);
+      SDL_SetRenderDrawColor(renderer, 0, 118, 103, 255);
     } else {
-      SDL_SetRenderDrawColor(renderer, 50, 50, 150, 255);
+      SDL_SetRenderDrawColor(renderer, 0, 159, 139, 255);
     }
   }
 
   void highlight_colour(SDL_Renderer *renderer) {
     if (hover == true) {
-      SDL_SetRenderDrawColor(renderer, 50, 50, 255, 255);
+      SDL_SetRenderDrawColor(renderer, 200, 200, 200, 255);
     } else {
-      SDL_SetRenderDrawColor(renderer, 100, 100, 255, 255);
+      SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
     }
   }
 };

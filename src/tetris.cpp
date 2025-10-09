@@ -1,3 +1,4 @@
+#include <SDL3/SDL_blendmode.h>
 #include <functional>
 #include <iostream>
 #include <map>
@@ -27,11 +28,13 @@ Tetris::Tetris() : Object(0, 0, 0, 0) {
   for (Cube &i : termino_cubes) {
     i.set_width(constants::TETRIS_CUBE_WIDTH);
     i.set_y(-50);
+    i.set_highlight(true);
   }
 
   for (Cube &i : preview_cubes) {
     i.set_width(constants::TETRIS_CUBE_WIDTH);
     i.set_y(-50);
+    i.set_highlight(true);
   }
 
   for (Cube &i : ghost_cubes) {
@@ -43,6 +46,7 @@ Tetris::Tetris() : Object(0, 0, 0, 0) {
   for (Cube &i : saved_cubes) {
     i.set_width(constants::TETRIS_CUBE_WIDTH);
     i.set_y(-50);
+    i.set_highlight(true);
   }
 
 }
@@ -250,9 +254,11 @@ void Tetris::render(SDL_Renderer *renderer) {
   display.render(renderer);
 
 
+  SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_BLEND);
   for (Cube &i : preview_cubes) {
     i.render(renderer);
   }
+
   for (Cube &i : saved_cubes) {
     i.render(renderer);
   }
