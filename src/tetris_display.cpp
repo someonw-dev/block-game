@@ -1,13 +1,14 @@
 #include <SDL3/SDL_blendmode.h>
 #include <SDL3/SDL_render.h>
+#include <SDL3/SDL_timer.h>
 #include "../include/tetris_display.h"
 #include "../include/colour_map.h"
 #include "../include/colours.h"
 
 // the tetris board has a width of 10 cubes by 22 cubes for height (with another 18 unrendered);
-TetrisDisplay::TetrisDisplay(float x, float y, float width) : Object(x, y - width * 22/10, width, width * 22/10) {
+TetrisDisplay::TetrisDisplay(float x, float y, float width, int (*arrTetris)[10][40]) : Object(x, y - width * 22/10, width, width * 22/10) {
   const float LENGTH = constants::TETRIS_CUBE_WIDTH;
-  std::cout << LENGTH << std::endl;
+  arrData = arrTetris;
 
   for (int i = 0; i<constants::MAX_WIDTH; i++) {
     for (int k = 1; k<constants::MAX_HEIGHT + 1; k++) {
@@ -20,6 +21,14 @@ TetrisDisplay::TetrisDisplay(float x, float y, float width) : Object(x, y - widt
 TetrisDisplay::~TetrisDisplay() {}
 
 void TetrisDisplay::render(SDL_Renderer *renderer) {
+
+  // check if you need to update the colours after a flash
+  end = SDL_GetTicks();
+  if (end > start + FLASH_TIME && update) {
+    update_colours();
+    update = false;
+  }
+
   // rendered first so that the other ones will draw on top of it
   SDL_SetRenderDrawColor(renderer, 40, 50, 75, 255);
   SDL_RenderFillRect(renderer, &region);
@@ -34,7 +43,12 @@ void TetrisDisplay::render(SDL_Renderer *renderer) {
 }
 
 // should be called anytime the board info changes
-void TetrisDisplay::updateColours(int (*arrData)[10][40]) {
+void TetrisDisplay::flash_and_update(int (*y_values)[4]) {
+  // do an explode and then update
+  update_colours();
+}
+
+void TetrisDisplay::update_colours() {
   for (int i = 0; i<constants::MAX_WIDTH; i++) {
     for (int k = 0; k<constants::MAX_HEIGHT; k++) {
       //arrCubes[i][k].set_colour(colour_map[(*arrData)[i][k]][0], colour_map[(*arrData)[i][k]][1]);

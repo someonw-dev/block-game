@@ -20,10 +20,13 @@
 #include "../include/constants.h"
 #include "../include/tetris.h"
 #include "../include/text.h"
+#include "../include/input.h"
+#include "../include/button_switch.h"
 
 Tetris terminomino;
 static bool paused = false;
 static bool first_session = false;
+ButtonSwitch *btnInfinity;
 
 // constructor
 TetrisScene::TetrisScene() : Scene("Tetris") {
@@ -57,6 +60,11 @@ void return_button() {
   SceneManager::getInstance().return_scene();
 }
 
+void change_infinity() {
+  terminomino.change_infinity_permissions();
+  btnInfinity->change_state(terminomino.get_infinity_permissions());
+}
+
 Text *score;
 Text *level;
 
@@ -82,7 +90,8 @@ void TetrisScene::init() {
   const float HEIGHT = 60;
   const float BUTTON_CENTER = centerX - WIDTH * 0.5;
 
-  Text *lblPaused = new Text("Paused", centerX - 100, 30, 200, SceneManager::getInstance().get_renderer());
+  // ======= PAUSE STUFF ======
+  Text *lblPaused = new Text("Paused", centerX - 100, centerY - 130, 200, SceneManager::getInstance().get_renderer());
   push_paused_object(lblPaused);
 
   Button *btnContinue= new Button(BUTTON_CENTER, centerY - 50 , WIDTH, HEIGHT, &resume);
@@ -93,9 +102,20 @@ void TetrisScene::init() {
   btnBack->set_text(std::make_unique<Text>("Back", 0, 0, 60, SceneManager::getInstance().get_renderer()));
   push_paused_object(btnBack);
 
+  const float INFINITY_X = BUTTON_CENTER - 150;
+  Text *lblInfinity= new Text("Infinity", INFINITY_X + 15, centerY - 30, 100, SceneManager::getInstance().get_renderer());
+  push_paused_object(lblInfinity);
+
+  btnInfinity = new ButtonSwitch(INFINITY_X, centerY, WIDTH - 20, HEIGHT - 10, &change_infinity);
+  btnInfinity->set_enabled_text_text(std::make_unique<Text>("Enabled", 0, 0, 80, SceneManager::getInstance().get_renderer()));
+  btnInfinity->set_disabled_text_text(std::make_unique<Text>("Disabled", 0, 0, 80, SceneManager::getInstance().get_renderer()));
+  btnInfinity->change_state(terminomino.get_infinity_permissions());
+  push_paused_object(btnInfinity);
+
   Button *btnRestart = new Button(TETRIS_RIGHT + RIGHT_MARGIN, centerY + 50, 100, 40, &start_game);
   btnRestart->set_text(std::make_unique<Text>("Start", 0, 0, 60, SceneManager::getInstance().get_renderer()));
   push_lost_object(btnRestart);
+
   /*
   Button *btnExit= new Button(BUTTON_CENTER, centerY + 150, WIDTH, HEIGHT, &quit_tetris);
   btnExit->set_text(std::make_unique<Text>("Quit", 0, 0, 50, SceneManager::getInstance().get_renderer()));
@@ -128,10 +148,18 @@ void TetrisScene::on_render(SDL_Renderer *renderer) {
 
   if (paused) {
     SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_BLEND);
-    SDL_FRect rect {0, 0, constants::SCREEN_WIDTH, constants::SCREEN_HEIGHT};
+    static SDL_FRect pause_gray {0, 0, constants::SCREEN_WIDTH, constants::SCREEN_HEIGHT};
     SDL_SetRenderDrawColor(renderer, 50, 50, 50, 100);
-    SDL_RenderFillRect(renderer, &rect);
+    SDL_RenderFillRect(renderer, &pause_gray);
     SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_NONE);
+
+    static const float PAUSE_WIDTH = 500;
+    static const float PAUSE_HEIGHT = 300;
+    static const float MENU_X = constants::SCREEN_WIDTH * 0.5 - PAUSE_WIDTH *0.5;
+    static const float MENU_Y = constants::SCREEN_HEIGHT * 0.5 - PAUSE_HEIGHT*0.5;
+    static SDL_FRect pause_menu {MENU_X, 200, PAUSE_WIDTH, 300};
+    SDL_SetRenderDrawColor(renderer, 100, 100, 100, 255);
+    SDL_RenderFillRect(renderer, &pause_menu);
 
     for (Object *i : paused_objects) {
       i->render(renderer);
@@ -144,21 +172,54 @@ void TetrisScene::update() {
   static Uint64 start_time = SDL_GetTicks();
   int level = terminomino.get_level();
 
-  // =======================
-  // ======== input ========
-  // =======================
-
-  const bool* keys = SDL_GetKeyboardState(NULL);
-
-
-
-
-
-  // === game logic ===
   Uint64 end = SDL_GetTicks();
 
   // *1000 to get time in miliseconds
   float time = std::pow(0.8-(level-1)*0.007, level-1) * 1000;
+
+  // =======================
+  // ======== input ========
+  // =======================
+  static InputHandler down = {SDL_SCANCODE_DOWN};
+  static InputHandler left = {SDL_SCANCODE_LEFT};
+  static InputHandler right = {SDL_SCANCODE_RIGHT};
+  static InputHandler rotate_right = {SDL_SCANCODE_X};
+  static InputHandler rotate_left = {SDL_SCANCODE_Z};
+
+  const bool* keys = SDL_GetKeyboardState(NULL);
+
+  if (!paused && terminomino.is_running()) {
+    if (down.get_pressed(keys)) {
+      terminomino.move_down();
+      start_time = SDL_GetTicks();
+    }
+    if (left.get_pressed(keys)) {
+      terminomino.move(-1, 0);
+      if (terminomino.can_infinity()) {
+        start_time = SDL_GetTicks();
+      }
+    }
+    if (right.get_pressed(keys)) {
+      terminomino.move(1, 0);
+      if (terminomino.can_infinity()) {
+        start_time = SDL_GetTicks();
+      }
+    }
+    if (rotate_left.get_pressed(keys)) {
+      terminomino.rotate_left();
+      if (terminomino.can_infinity()) {
+        start_time = SDL_GetTicks();
+      }
+    }
+    if (rotate_right.get_pressed(keys)) {
+      terminomino.rotate_right();
+      if (terminomino.can_infinity()) {
+        start_time = SDL_GetTicks();
+      }
+    }
+  }
+
+  // === game logic ===
 
   // on left/right/rotate if it is next_fall_place do the mercy period
   // on down, quick_place, swap active piece reset start_time
@@ -176,21 +237,7 @@ void TetrisScene::on_event(SDL_Event *event) {
   // TODO: write this in update so that the presses feel better
   if (event->type == SDL_EVENT_KEY_DOWN) {
     if (!paused && terminomino.is_running()) {
-      if (event->key.scancode == SDL_SCANCODE_LEFT) {
-        terminomino.move(-1, 0);
-      }
-      if (event->key.scancode == SDL_SCANCODE_RIGHT) {
-        terminomino.move(1, 0);
-      }
-      if (event->key.scancode == SDL_SCANCODE_DOWN) {
-        terminomino.move(0, -1);
-      }
-      if (event->key.scancode == SDL_SCANCODE_Z) {
-        terminomino.rotate_left();
-      }
-      if (event->key.scancode == SDL_SCANCODE_X) {
-        terminomino.rotate_right();
-      }
+      // these can be here since they are 1 button inputs anyways
       if (event->key.scancode == SDL_SCANCODE_SPACE) {
         terminomino.quick_place();
       }

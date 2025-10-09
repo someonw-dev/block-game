@@ -1,4 +1,3 @@
-// header gaurd
 #pragma once
 
 #include <SDL3/SDL.h>
@@ -12,12 +11,12 @@
 #include "object.h"
 #include "text.h"
 
-class Button : public Object
+class ButtonSwitch : public Object
 {
 public:
   //Bjarne Stroustrup the inventor of C++ suggests to use public first and then private.
   // ==== Constructor ====
-  Button(float x, float y, float width, float height, void(*callbackFunc)()) : Object(x, y, width, height){
+  ButtonSwitch(float x, float y, float width, float height, void(*callbackFunc)()) : Object(x, y, width, height){
     inner = {x + BORDER, y + BORDER, width - BORDER*2, height-BORDER*2};
 
     int inner_x = x + BORDER;
@@ -53,10 +52,7 @@ public:
 
     callback = callbackFunc;
   }
-  Button(float x, float y, float width, float height, int z, void(*callbackFunc)()) : Object(x, y, width, height, z){
-    callback = callbackFunc;
-  }
-  ~Button() {};
+  ~ButtonSwitch() {};
 
   void on_event(SDL_Event *event) {
     const SDL_FPoint cursor = {event->button.x, event->button.y};
@@ -87,24 +83,44 @@ public:
       SDL_RenderFillRect(renderer, &i);
     }
 
-    if (caption) {
-      caption->render(renderer);
+    if (enabled) {
+      if (enabled_text) {
+        enabled_text->render(renderer);
+      }
+    } else {
+      if (disabled_text) {
+        disabled_text->render(renderer);
+      }
     }
   }
 
-  void set_text(std::unique_ptr<Text> text) {
-    caption = std::move(text);
-    caption->set_x(region.x + region.w * 0.5 - caption->get_width() * 0.5);
-    caption->set_y(region.y + region.h * 0.5 - caption->get_height() * 0.5);
+  void set_enabled_text_text(std::unique_ptr<Text> text) {
+    enabled_text = std::move(text);
+    enabled_text->set_x(region.x + region.w * 0.5 - enabled_text->get_width() * 0.5);
+    enabled_text->set_y(region.y + region.h * 0.5 - enabled_text->get_height() * 0.5);
   }
 
+  void set_disabled_text_text(std::unique_ptr<Text> text) {
+    disabled_text = std::move(text);
+    disabled_text->set_x(region.x + region.w * 0.5 - disabled_text->get_width() * 0.5);
+    disabled_text->set_y(region.y + region.h * 0.5 - disabled_text->get_height() * 0.5);
+  }
 
+  void change_state(bool new_state) {
+    enabled = new_state;
+  }
+
+  bool get_state() {
+    return enabled;
+  }
 
 private:
   bool hover;
+  bool enabled;
   const int BORDER = 5;
   void(*callback)();
-  std::unique_ptr<Text> caption = nullptr;
+  std::unique_ptr<Text> enabled_text = nullptr;
+  std::unique_ptr<Text> disabled_text = nullptr;
   SDL_FRect shadow_bottom;
   SDL_FRect shadow_right;
   SDL_FRect inner;
@@ -120,18 +136,34 @@ private:
   }
 
   void main_colour(SDL_Renderer *renderer) {
-    if (hover == true) {
-      SDL_SetRenderDrawColor(renderer, 0, 216, 189, 255);
+    if (enabled) {
+      if (hover == true) {
+        SDL_SetRenderDrawColor(renderer, 126, 225, 0, 255);
+      } else {
+        SDL_SetRenderDrawColor(renderer, 183, 255, 0, 255);
+      }
     } else {
-      SDL_SetRenderDrawColor(renderer, 0, 255, 223, 255);
+      if (hover == true) {
+        SDL_SetRenderDrawColor(renderer, 240, 0, 0, 255);
+      } else {
+        SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);
+      }
     }
   }
 
   void shadow_colour(SDL_Renderer *renderer) {
-    if (hover == true) {
-      SDL_SetRenderDrawColor(renderer, 0, 118, 103, 255);
+    if (enabled) {
+      if (hover == true) {
+        SDL_SetRenderDrawColor(renderer, 71, 160, 0, 255);
+      } else {
+        SDL_SetRenderDrawColor(renderer, 70, 185, 0, 255);
+      }
     } else {
-      SDL_SetRenderDrawColor(renderer, 0, 159, 139, 255);
+      if (hover == true) {
+        SDL_SetRenderDrawColor(renderer, 150, 0, 0, 255);
+      } else {
+        SDL_SetRenderDrawColor(renderer, 185, 0, 0, 255);
+      }
     }
   }
 

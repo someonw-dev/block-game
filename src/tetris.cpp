@@ -14,13 +14,15 @@
 #include <vector>
 
 int arrTetris[10][40];
-TetrisDisplay display = {constants::TETRIS_X, constants::TETRIS_Y, constants::TETRIS_WIDTH};
+TetrisDisplay display = {constants::TETRIS_X, constants::TETRIS_Y, constants::TETRIS_WIDTH, &arrTetris};
 
 // at first i was updating the array as the termino was moving down but then i realised
 // i really just... dont have to do that lmao
 Tetris::Tetris() : Object(0, 0, 0, 0) {
   termino_init();
+  infinities = 0;
   rotation = 0;
+  infinities_enabled = true;
   swap = true;
   lost = true;
   level = 5;
@@ -52,6 +54,26 @@ Tetris::Tetris() : Object(0, 0, 0, 0) {
 }
 Tetris::~Tetris() {}
 
+void Tetris::inc_infinities() {
+  ++infinities;
+}
+void Tetris::change_infinity_permissions() {
+  infinities_enabled = !infinities_enabled;
+}
+
+bool Tetris::get_infinity_permissions() {
+  return infinities_enabled;
+}
+
+bool Tetris::can_infinity() {
+  if (infinities < MAX_INFINITY && infinities_enabled && next_fall_is_place()) {
+    ++infinities;
+    return true;
+  }
+
+  return false;
+}
+
 bool Tetris::is_running() {
   // if lost = true running is false 
   return !lost;
@@ -61,7 +83,6 @@ int Tetris::get_score() {
   return score;
 }
 
-// call rotate (+1/-1) rotate -> check test conditions and use first one that works -> if they all fail dont rotate
 void Tetris::rotate_left() {
   rotate(-1);
 }
@@ -80,7 +101,7 @@ void Tetris::rotate(int r) {
     wanted_rotation = 3;
   }
 
-  // there are 5 tests each with 8 different test values depending on where it is rotating from
+  // there are 5 checks each with 8 different test values depending on where it is rotating from
   // these values are defined in the terminos themself because the I termino has different test values
   if (check_valid(X, Y, wanted_rotation)) {
     rotation = wanted_rotation;
@@ -126,10 +147,10 @@ void Tetris::quick_place() {
 bool Tetris::next_fall_is_place()
 {
   if (check_valid(X, Y - 1, rotation)) {
-    return true;
+    return false;
   }
 
-  return false;
+  return true;
 }
 
 // also known as a soft drop
@@ -137,10 +158,7 @@ void Tetris::move_down() {
 
   score += 1;
 
-  // if a down move is not valid it should place down the tile
-  if (!move(0, -1)) {
-    place_termino();
-  }
+  move(0, -1);
 }
 
 void Tetris::fall() {
@@ -156,28 +174,28 @@ void Tetris::place_termino() {
   }
 
   clear_row();
-  display.updateColours(&arrTetris);
 
+  infinities = 0;
   swap = true;
-  // move termino back up, get new termino, check for line clears
   set_new_termino();
-  //move_cubes();
 }
 
 void Tetris::clear_row() {
   std::vector<int> rows = get_unique_y();
+  int full_rows[4] {-1, -1, -1, -1};
 
   int counter = 0;
   for (int &i: rows) {
-    bool filled = true;
+    bool row_full = true;
     for (int k = 0; k<constants::MAX_WIDTH; k++) {
       if (arrTetris[k][i] == 0) {
-        filled = false;
+        row_full = false;
         break;
       }
     }
 
-    if (filled) {
+    if (row_full) {
+      full_rows[counter] = i;
       ++counter;
       for (int k = i; k<constants::MAX_HEIGHT - 1; k++) {
         for (int j = 0; j<constants::MAX_WIDTH; j++) {
@@ -186,6 +204,8 @@ void Tetris::clear_row() {
       }
     }
   }
+
+  display.flash_and_update(&full_rows);
 
   switch (counter) {
     case 1: {
@@ -209,10 +229,11 @@ void Tetris::clear_row() {
 
 void Tetris::start() {
   full_clear();
-  display.updateColours(&arrTetris);
+  display.update_colours();
   set_new_termino();
   move_cubes();
 
+  score = 0;
   lost = false;
 }
 

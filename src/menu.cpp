@@ -18,17 +18,10 @@ StartMenu::StartMenu() : Scene("Menu") {
 StartMenu::~StartMenu() {}
 
 void play() {
-  std::cout << "play" << std::endl;
   SceneManager::getInstance().transition(std::make_unique<TetrisScene>());
 }
 
-void settings() {
-  std::cout << "settings" << std::endl;
-}
-
 void quit() {
-  std::cout << "quit" << std::endl;
-
   // pushes a quit event
   SDL_Event event;
   SDL_zero(event);

@@ -35,6 +35,13 @@ public:
   void set_level(int new_level);
   int get_score();
 
+  bool can_infinity();
+  void inc_infinities();
+  void change_infinity_permissions();
+  bool get_infinity_permissions();
+
+  void update();
+
 private:
   std::vector<int> get_unique_y();
   bool check_occupied(int x, int y, int r);
@@ -67,4 +74,8 @@ private:
   int max_level;
   int highest_scores[10];
   bool lost;
+
+  bool infinities_enabled;
+  int infinities;
+  const int MAX_INFINITY = 5;
 };

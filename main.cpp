@@ -29,7 +29,6 @@ int width = constants::SCREEN_WIDTH;
 int height = constants::SCREEN_HEIGHT;
 
 static SDL_Window *window = nullptr;
-// idk i need this for the fonts dont know what else to do
 SDL_Renderer* renderer = nullptr;
 TTF_Font* fonts::default_font;
 
