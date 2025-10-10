@@ -22,7 +22,7 @@ public:
   void rotate(int r);
   bool move(int relative_x, int relative_y);
   void quick_place();
-  void move_down();
+  bool move_down();
   void fall();
   void place_termino();
   void render(SDL_Renderer *renderer) override;

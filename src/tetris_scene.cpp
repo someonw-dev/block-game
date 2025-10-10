@@ -22,6 +22,7 @@
 #include "../include/text.h"
 #include "../include/input.h"
 #include "../include/button_switch.h"
+#include "../include/background.h"
 
 Tetris terminomino;
 static bool paused = false;
@@ -69,6 +70,9 @@ Text *score;
 Text *level;
 
 void TetrisScene::init() {
+  Background *background = new Background();
+  push_obj(background);
+
   const float centerX = constants::SCREEN_WIDTH / 2.0;
   const float centerY = constants::SCREEN_HEIGHT / 2.0;
 
@@ -190,8 +194,9 @@ void TetrisScene::update() {
 
   if (!paused && terminomino.is_running()) {
     if (down.get_pressed(keys)) {
-      terminomino.move_down();
-      start_time = SDL_GetTicks();
+      if (terminomino.move_down()) {
+        start_time = SDL_GetTicks();
+      }
     }
     if (left.get_pressed(keys)) {
       terminomino.move(-1, 0);

@@ -154,11 +154,15 @@ bool Tetris::next_fall_is_place()
 }
 
 // also known as a soft drop
-void Tetris::move_down() {
+bool Tetris::move_down() {
 
-  score += 1;
+  // if you can move down
+  if (move(0, -1)) {
+    score += 1;
+    return true;
+  }
 
-  move(0, -1);
+  return false;
 }
 
 void Tetris::fall() {
@@ -230,6 +234,14 @@ void Tetris::clear_row() {
 void Tetris::start() {
   full_clear();
   display.update_colours();
+  saved_termino = nullptr;
+
+  for (Cube &i : saved_cubes) {
+    i.set_width(constants::TETRIS_CUBE_WIDTH);
+    i.set_y(-50);
+    i.set_highlight(true);
+  }
+
   set_new_termino();
   move_cubes();
 

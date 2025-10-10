@@ -10,6 +10,7 @@
 #include "../include/button.h"
 #include "../include/constants.h"
 #include "../include/text.h"
+#include "../include/background.h"
 
 // constructor
 StartMenu::StartMenu() : Scene("Menu") {
@@ -30,6 +31,9 @@ void quit() {
 }
 
 void StartMenu::init() {
+  Background *background = new Background();
+  push_obj(background);
+
   const float centerX = constants::SCREEN_WIDTH / 2.0;
   const float centerY = constants::SCREEN_HEIGHT / 2.0;
 
