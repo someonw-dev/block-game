@@ -28,7 +28,7 @@ public:
   void render(SDL_Renderer *renderer) override;
   void swap_active_piece();
   bool next_fall_is_place();
-  void start();
+  void start(int start_level);
 
   bool is_running();
   int get_level();
@@ -69,13 +69,17 @@ private:
   //global x, y
   int X;
   int Y;
+
   int score;
   int level;
+  int lines_needed;
   int max_level;
+
   int highest_scores[10];
+
   bool lost;
 
   bool infinities_enabled;
   int infinities;
-  const int MAX_INFINITY = 5;
+  const int MAX_INFINITY = 10;
 };

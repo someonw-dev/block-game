@@ -24,9 +24,11 @@
 #include "../include/button_switch.h"
 #include "../include/background.h"
 
+// having the piece defined here lets it stay alive even when the scene gets killed
 Tetris terminomino;
 static bool paused = false;
 static bool first_session = false;
+static int start_level = 1;
 ButtonSwitch *btnInfinity;
 
 // constructor
@@ -44,7 +46,7 @@ TetrisScene::~TetrisScene() {
 }
 
 void start_game() {
-  terminomino.start();
+  terminomino.start(start_level);
 }
 
 void resume() {
@@ -56,7 +58,7 @@ void paused_game() {
 }
 
 void return_button() {
-  // should take you to the level select
+  // should take you to the menu
   //SceneManager::getInstance().transition(std::make_unique<StartMenu>());
   SceneManager::getInstance().return_scene();
 }
@@ -131,7 +133,8 @@ void TetrisScene::init() {
 void TetrisScene::on_render(SDL_Renderer *renderer) {
   //SDL_RenderLine(renderer, 0, 0, 50, 50);
 
-  static int score_value;
+  static int score_value = 0;
+  static int level_value = 1;
 
   // only update the text if it has changed since this can be a little expensive
   if (score_value != terminomino.get_score()) {
@@ -141,6 +144,16 @@ void TetrisScene::on_render(SDL_Renderer *renderer) {
     strcat(str, std::to_string(score_value).c_str());
     score->update_text(str, renderer);
   }
+
+  // update level label
+  if (level_value != terminomino.get_level()) {
+    level_value = terminomino.get_level();
+    static char str[100];
+    strcpy(str, "Level: ");
+    strcat(str, std::to_string(level_value).c_str());
+    level->update_text(str, renderer);
+  }
+
   terminomino.render(renderer);
 
 
@@ -221,6 +234,12 @@ void TetrisScene::update() {
       if (terminomino.can_infinity()) {
         start_time = SDL_GetTicks();
       }
+    }
+  }
+
+  if (terminomino.is_running()) {
+    if (terminomino.next_fall_is_place()) {
+      time = 500;
     }
   }
 

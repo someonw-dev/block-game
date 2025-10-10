@@ -25,7 +25,8 @@ Tetris::Tetris() : Object(0, 0, 0, 0) {
   infinities_enabled = true;
   swap = true;
   lost = true;
-  level = 5;
+  level = 1;
+  lines_needed = level * 10;
 
   for (Cube &i : termino_cubes) {
     i.set_width(constants::TETRIS_CUBE_WIDTH);
@@ -199,6 +200,11 @@ void Tetris::clear_row() {
     }
 
     if (row_full) {
+      --lines_needed;
+      if (lines_needed <= 0) {
+        ++level;
+        lines_needed = level * 10;
+      }
       full_rows[counter] = i;
       ++counter;
       for (int k = i; k<constants::MAX_HEIGHT - 1; k++) {
@@ -231,7 +237,7 @@ void Tetris::clear_row() {
   }
 }
 
-void Tetris::start() {
+void Tetris::start(int start_level) {
   full_clear();
   display.update_colours();
   saved_termino = nullptr;
@@ -245,7 +251,9 @@ void Tetris::start() {
   set_new_termino();
   move_cubes();
 
-  score = 0;
+  score = 0; 
+  level = start_level;
+  lines_needed = level * 10;
   lost = false;
 }
 
