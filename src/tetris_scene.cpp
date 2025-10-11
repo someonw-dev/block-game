@@ -23,11 +23,13 @@
 #include "../include/input.h"
 #include "../include/button_switch.h"
 #include "../include/background.h"
+#include "../include/menu.h"
+#include "../include/highscore_scene.h"
 
 // having the piece defined here lets it stay alive even when the scene gets killed
 Tetris terminomino;
 static bool paused = false;
-static bool first_session = false;
+static bool first_session = true;
 static int start_level = 1;
 ButtonSwitch *btnInfinity;
 
@@ -37,15 +39,22 @@ TetrisScene::TetrisScene() : Scene("Tetris") {
 }
 
 TetrisScene::~TetrisScene() {
-    for (Object *i : paused_objects) {
-      delete i;
+  for (Object *i : paused_objects) {
+    delete i;
   }
-    for (Object *i : lost_objects) {
-      delete i;
+  for (Object *i : lost_objects) {
+    delete i;
+  }
+  for (Object *i : shared_objects) {
+    delete i;
+  }
+  for (Object *i : first_objects) {
+    delete i;
   }
 }
 
 void start_game() {
+  first_session = false;
   terminomino.start(start_level);
 }
 
@@ -59,8 +68,7 @@ void paused_game() {
 
 void return_button() {
   // should take you to the menu
-  //SceneManager::getInstance().transition(std::make_unique<StartMenu>());
-  SceneManager::getInstance().return_scene();
+  SceneManager::getInstance().transition(std::make_unique<StartMenu>());
 }
 
 void change_infinity() {
@@ -68,44 +76,33 @@ void change_infinity() {
   btnInfinity->change_state(terminomino.get_infinity_permissions());
 }
 
-Text *score;
-Text *level;
 
-void TetrisScene::init() {
-  Background *background = new Background();
-  push_obj(background);
+void tetris_to_highscore() {
+  SceneManager::getInstance().transition(std::make_unique<HighscoreScene>());
+}
 
+void TetrisScene::pause_init() {
   const float centerX = constants::SCREEN_WIDTH / 2.0;
   const float centerY = constants::SCREEN_HEIGHT / 2.0;
-
-  Button *btnPause= new Button(constants::SCREEN_WIDTH - 50, 10, 40, 40, &paused_game);
-  btnPause->set_text(std::make_unique<Text>("||", 0, 0, 15, SceneManager::getInstance().get_renderer()));
-  push_obj(btnPause);
-
-  //push_obj(new TetrisDisplay(constants::TETRIS_X, constants::TETRIS_Y, constants::TETRIS_WIDTH));
-
   const float TETRIS_RIGHT = constants::TETRIS_X + constants::TETRIS_WIDTH;
   const float RIGHT_MARGIN = 20;
-
-  score = new Text("Score: 0", TETRIS_RIGHT + RIGHT_MARGIN, 230, 140, SceneManager::getInstance().get_renderer());
-  push_obj(score);
-
-  level = new Text("Level: 1", TETRIS_RIGHT + RIGHT_MARGIN, 270, 80, SceneManager::getInstance().get_renderer());
-  push_obj(level);
   const float WIDTH = 150;
-  const float HEIGHT = 60;
+  const float HEIGHT = 50;
   const float BUTTON_CENTER = centerX - WIDTH * 0.5;
 
-  // ======= PAUSE STUFF ======
   Text *lblPaused = new Text("Paused", centerX - 100, centerY - 130, 200, SceneManager::getInstance().get_renderer());
   push_paused_object(lblPaused);
 
-  Button *btnContinue= new Button(BUTTON_CENTER, centerY - 50 , WIDTH, HEIGHT, &resume);
+  Button *btnContinue= new Button(BUTTON_CENTER, centerY - 60 , WIDTH, HEIGHT, &resume);
   btnContinue->set_text(std::make_unique<Text>("Continue", 0, 0, 100, SceneManager::getInstance().get_renderer()));
   push_paused_object(btnContinue);
 
-  Button *btnBack = new Button(BUTTON_CENTER, centerY + 50, WIDTH, HEIGHT, &return_button);
-  btnBack->set_text(std::make_unique<Text>("Back", 0, 0, 60, SceneManager::getInstance().get_renderer()));
+  Button *btnHighscores = new Button(BUTTON_CENTER, centerY + 5, WIDTH, HEIGHT, &tetris_to_highscore);
+  btnHighscores->set_text(std::make_unique<Text>("HIGHSCORES", 0, 0, 130, SceneManager::getInstance().get_renderer()));
+  push_paused_object(btnHighscores);
+
+  Button *btnBack = new Button(BUTTON_CENTER, centerY + 70, WIDTH, HEIGHT, &return_button);
+  btnBack->set_text(std::make_unique<Text>("Menu", 0, 0, 60, SceneManager::getInstance().get_renderer()));
   push_paused_object(btnBack);
 
   const float INFINITY_X = BUTTON_CENTER - 150;
@@ -118,47 +115,80 @@ void TetrisScene::init() {
   btnInfinity->change_state(terminomino.get_infinity_permissions());
   push_paused_object(btnInfinity);
 
-  Button *btnRestart = new Button(TETRIS_RIGHT + RIGHT_MARGIN, centerY + 50, 100, 40, &start_game);
-  btnRestart->set_text(std::make_unique<Text>("Start", 0, 0, 60, SceneManager::getInstance().get_renderer()));
-  push_lost_object(btnRestart);
 
-  /*
-  Button *btnExit= new Button(BUTTON_CENTER, centerY + 150, WIDTH, HEIGHT, &quit_tetris);
-  btnExit->set_text(std::make_unique<Text>("Quit", 0, 0, 50, SceneManager::getInstance().get_renderer()));
-  push_paused_object(btnExit);
-  */
 }
 
+void TetrisScene::shared_init() {
+  const float centerX = constants::SCREEN_WIDTH / 2.0;
+  const float centerY = constants::SCREEN_HEIGHT / 2.0;
+
+  const float TETRIS_RIGHT = constants::TETRIS_X + constants::TETRIS_WIDTH;
+  const float RIGHT_MARGIN = 20;
+
+  Button *btnRestart = new Button(TETRIS_RIGHT + RIGHT_MARGIN, centerY + 50, 100, 40, &start_game);
+  btnRestart->set_text(std::make_unique<Text>("Start", 0, 0, 60, SceneManager::getInstance().get_renderer()));
+  push_shared_object(btnRestart);
+}
+
+void TetrisScene::lost_init() {
+
+}
+
+void TetrisScene::init() {
+  Background *background = new Background();
+  push_obj(background);
+
+  const float centerX = constants::SCREEN_WIDTH / 2.0;
+  const float centerY = constants::SCREEN_HEIGHT / 2.0;
+
+  const float TETRIS_RIGHT = constants::TETRIS_X + constants::TETRIS_WIDTH;
+  const float RIGHT_MARGIN = 20;
+
+  Button *btnPause= new Button(constants::SCREEN_WIDTH - 50, 10, 40, 40, &paused_game);
+  btnPause->set_text(std::make_unique<Text>("||", 0, 0, 15, SceneManager::getInstance().get_renderer()));
+  push_obj(btnPause);
+
+  const float LABEL_START_Y = 300;
+
+  score = new Text("Score: 0", TETRIS_RIGHT + RIGHT_MARGIN, LABEL_START_Y, 140, SceneManager::getInstance().get_renderer());
+  push_obj(score);
+
+  level = new Text("Level: 1", TETRIS_RIGHT + RIGHT_MARGIN, LABEL_START_Y + 30, 80, SceneManager::getInstance().get_renderer());
+  push_obj(level);
+
+  lines_needed = new Text("Lines: 10", TETRIS_RIGHT + RIGHT_MARGIN, LABEL_START_Y + 47, 90, SceneManager::getInstance().get_renderer());
+  push_obj(lines_needed);
+
+  pause_init();
+  shared_init();
+}
+
+void update_text(int old_value, int value, const char label[], Text *text, SDL_Renderer *renderer) {
+  // only update the text if it has changed since this can be a little expensive
+  if (old_value != value) {
+    old_value = value;
+    static char str[100];
+    strcpy(str, label);
+    strcat(str, std::to_string(old_value).c_str());
+    text->update_text(str, renderer);
+  }
+}
 
 void TetrisScene::on_render(SDL_Renderer *renderer) {
   //SDL_RenderLine(renderer, 0, 0, 50, 50);
 
   static int score_value = 0;
   static int level_value = 1;
+  static int lines_needed_value = 10;
 
-  // only update the text if it has changed since this can be a little expensive
-  if (score_value != terminomino.get_score()) {
-    score_value = terminomino.get_score();
-    static char str[100];
-    strcpy(str, "Score: ");
-    strcat(str, std::to_string(score_value).c_str());
-    score->update_text(str, renderer);
-  }
-
-  // update level label
-  if (level_value != terminomino.get_level()) {
-    level_value = terminomino.get_level();
-    static char str[100];
-    strcpy(str, "Level: ");
-    strcat(str, std::to_string(level_value).c_str());
-    level->update_text(str, renderer);
-  }
+  update_text(score_value, terminomino.get_score(), "Score: ", score, renderer);
+  update_text(level_value, terminomino.get_level(), "Level: ", level, renderer);
+  update_text(lines_needed_value, terminomino.get_lines_needed(), "Lines: ", lines_needed, renderer);
 
   terminomino.render(renderer);
 
-
-  if (!terminomino.is_running()) {
-    for (Object *i : lost_objects) {
+  if (!terminomino.is_running() || first_session) {
+    for (Object *i : shared_objects) {
       i->render(renderer);
     }
   }
@@ -212,26 +242,23 @@ void TetrisScene::update() {
       }
     }
     if (left.get_pressed(keys)) {
-      terminomino.move(-1, 0);
-      if (terminomino.can_infinity()) {
-        start_time = SDL_GetTicks();
+      // should only infinity if your move actually goes through
+      if (terminomino.move(-1, 0) && terminomino.can_infinity()) {
+          start_time = SDL_GetTicks();
       }
     }
     if (right.get_pressed(keys)) {
-      terminomino.move(1, 0);
-      if (terminomino.can_infinity()) {
+      if (terminomino.move(1, 0) && terminomino.can_infinity()) {
         start_time = SDL_GetTicks();
       }
     }
     if (rotate_left.get_pressed(keys)) {
-      terminomino.rotate_left();
-      if (terminomino.can_infinity()) {
+      if (terminomino.rotate_left() && terminomino.can_infinity()) {
         start_time = SDL_GetTicks();
       }
     }
     if (rotate_right.get_pressed(keys)) {
-      terminomino.rotate_right();
-      if (terminomino.can_infinity()) {
+      if (terminomino.rotate_right() && terminomino.can_infinity()) {
         start_time = SDL_GetTicks();
       }
     }
@@ -274,8 +301,8 @@ void TetrisScene::on_event(SDL_Event *event) {
     }
   }
 
-  if (!terminomino.is_running() && !paused) {
-    for (Object *i : lost_objects) {
+  if ((!terminomino.is_running() || first_session) && !paused) {
+    for (Object *i : shared_objects) {
       i->on_event(event);
     }
   }

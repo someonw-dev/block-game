@@ -17,9 +17,8 @@ public:
   ~Tetris();
 
   // rotate -> check test conditions if one works use that one -> if they all fail
-  void rotate_left();
-  void rotate_right();
-  void rotate(int r);
+  bool rotate_left();
+  bool rotate_right();
   bool move(int relative_x, int relative_y);
   void quick_place();
   bool move_down();
@@ -32,8 +31,8 @@ public:
 
   bool is_running();
   int get_level();
-  void set_level(int new_level);
   int get_score();
+  int get_lines_needed();
 
   bool can_infinity();
   void inc_infinities();
@@ -48,6 +47,7 @@ private:
   bool check_in_range(int x, int y, int r);
   bool check_valid(int x, int y, int r);
   int get_y_intersect();
+  bool rotate(int r);
 
   void set_termino_colours();
   void set_new_termino();
@@ -66,6 +66,7 @@ private:
   Cube preview_cubes[4];
   Termino *ghost;
   Cube ghost_cubes[4];
+
   //global x, y
   int X;
   int Y;

@@ -55,6 +55,10 @@ Tetris::Tetris() : Object(0, 0, 0, 0) {
 }
 Tetris::~Tetris() {}
 
+int Tetris::get_lines_needed() {
+  return lines_needed;
+}
+
 void Tetris::inc_infinities() {
   ++infinities;
 }
@@ -84,15 +88,15 @@ int Tetris::get_score() {
   return score;
 }
 
-void Tetris::rotate_left() {
-  rotate(-1);
+bool Tetris::rotate_left() {
+  return rotate(-1);
 }
 
-void Tetris::rotate_right() {
-  rotate(1);
+bool Tetris::rotate_right() {
+  return rotate(1);
 }
 
-void Tetris::rotate(int r) {
+bool Tetris::rotate(int r) {
   int wanted_rotation = rotation;
   wanted_rotation += r;
 
@@ -107,6 +111,7 @@ void Tetris::rotate(int r) {
   if (check_valid(X, Y, wanted_rotation)) {
     rotation = wanted_rotation;
     move_cubes();
+    return true;
   } else {
     for (int i = 0; i<4; i++) {
       if (check_valid(X + termino->wall_kick_data[{rotation, wanted_rotation}][i].x,
@@ -118,12 +123,13 @@ void Tetris::rotate(int r) {
         rotation = wanted_rotation;
         move_cubes();
         // first valid set of coords is where it should be placed
-        break;
+        return true;
       }
     }
   }
 
   // if none of the checks pass it fails completely and doesnt rotate
+  return false;
 }
 
 bool Tetris::move(int relative_x, int relative_y) {
@@ -203,7 +209,7 @@ void Tetris::clear_row() {
       --lines_needed;
       if (lines_needed <= 0) {
         ++level;
-        lines_needed = level * 10;
+        lines_needed += 10;
       }
       full_rows[counter] = i;
       ++counter;
@@ -401,10 +407,6 @@ void Tetris::full_clear() {
 
 int Tetris::get_level() {
   return level;
-}
-
-void Tetris::set_level(int new_level) {
-  level = new_level;
 }
 
 std::vector<int> Tetris::get_unique_y() {
